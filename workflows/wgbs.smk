@@ -7,8 +7,8 @@ RAW_DIR = config["raw_fastqs_dir"]
 QC_DIR = config.get("qc_dir", "results/qc")  # fallback if not defined
 
 # Detect all R1 FastQC HTML files dynamically
-R1_files, = glob_wildcards(os.path.join(QC_DIR, "*R1*fastqc.html"))
-R2_files, = glob_wildcards(os.path.join(QC_DIR, "*R2*fastqc.html"))
+R1_files, = glob_wildcards(os.path.join(QC_DIR, "/*R1*fastqc.html"))
+R2_files, = glob_wildcards(os.path.join(QC_DIR, "/*R2*fastqc.html"))
 
 include: "rules/qc.smk"
 
