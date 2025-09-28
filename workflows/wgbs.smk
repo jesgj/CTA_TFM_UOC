@@ -14,7 +14,5 @@ include: "rules/qc.smk"
 
 rule all:
     input:
-        expand(os.path.join(QC_DIR, "{file}_fastqc.html"), file=R1_files),
-        expand(os.path.join(QC_DIR, "{file}_fastqc.html"), file=R2_files),
-        expand(os.path.join(QC_DIR, "{file}_fastqc.zip"),  file=R1_files),
-        expand(os.path.join(QC_DIR, "{file}_fastqc.zip"),  file=R2_files)
+        expand(os.path.join(QC_DIR, "/{file}_fastqc.html"), file=R1_files),
+        expand(os.path.join(QC_DIR, "/{file}_fastqc.html"), file=R2_files),
