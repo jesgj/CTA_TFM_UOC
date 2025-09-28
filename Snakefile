@@ -1,12 +1,22 @@
-# Load the configuration file passed by the user
-configfile: workflow.configfile
 
-PIPELINE = config.get("pipeline", None)
+# Load config file
+configfile: "config/config.yaml"
 
-if PIPELINE == "wgbs":
-    include: "workflows/wgbs.smk"
-elif PIPELINE == "rnaseq":
-    include: "workflows/rnaseq.smk"
-else:
-    print(f"ERROR: Unknown pipeline '{PIPELINE}'")
-    exit(1)
+# Import modules for different pipelines
+module rnaseq:
+    snakefile: "workflows/rnaseq.smk"
+    config: config["rnaseq"]
+    prefix: "rnaseq_"
+
+module wgbs:
+    snakefile: "workflows/wgbs.smk"
+    config: config["wgbs"]
+    prefix: "wgbs_"
+
+rule all:
+    if config["pipeline"] == "rnaseq":
+        use rule all from rnaseq
+    elif config["pipeline"] == "wgbs":
+        use rule all from wgbs
+    else:
+        input: "ERROR: Write 'rnaseq' o 'wgbs' in config.yaml"

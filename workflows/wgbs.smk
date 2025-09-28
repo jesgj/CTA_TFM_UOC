@@ -1,21 +1,17 @@
+# WGBS module workflow
+RAW_DIR = config["raw_fastqs_dir"]
+SAMPLES = config["samples"]
+QC_DIR = config.get("qc_dir", "results/qc")  # fallback if not defined
 
-# 1. Load the central configuration file
-configfile: "config/wgbs_config.yaml"
-
-# 2. Get a list of all sample names from the config file.
-SAMPLES = list(config["samples"].keys())
-
-# 3. Define the final desired output of the entire workflow.
-rule all:
+rule fastqc:
     input:
-         expand("results/wgbs/qc/{sample}.done", sample=config["samples"])
-        
-        # The trimmed FASTQ files
-        #expand("results/trimmed_reads/{sample}_R1_val_1.fq.gz", sample=SAMPLES),
-        
-        # QC reports for the new trimmed reads
-        #expand("results/trimmed_qc/{sample}_R1_val_1_fastqc.html", sample=SAMPLES)
-
-# 4. Include the modular rule files
-include: "rules/qc.smk"
-#include: "rules/trimming_and_qc.smk"
+        R1=lambda wc: f"{RAW_DIR}/{SAMPLES[wc.sample]['R1']}",
+        R2=lambda wc: f"{RAW_DIR}/{SAMPLES[wc.sample]['R2']}"
+    output:
+        html_R1=f"{QC_DIR}/{{sample}}_R1_fastqc.html",
+        html_R2=f"{QC_DIR}/{{sample}}_R2_fastqc.html",
+        zip_R1=f"{QC_DIR}/{{sample}}_R1_fastqc.zip",
+        zip_R2=f"{QC_DIR}/{{sample}}_R2_fastqc.zip"
+    threads: 2
+    shell:
+        "fastqc -o {QC_DIR} -t {threads} {input.R1} {input.R2}"
