@@ -1,0 +1,7 @@
+# pixi environments
+.pixi
+# raw data directory
+data/
+# ref directory (genomes and index)
+ref/
+
