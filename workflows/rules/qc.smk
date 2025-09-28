@@ -4,8 +4,8 @@ QC_DIR = config.get("qc_dir", "results/wgbs/qc")  # fallback default
 
 rule fastqc:
     input:
-        R1 = lambda wildcards: f"{RAW_DIR}/{SAMPLES[wildcards.sample]['R1']}",
-        R2 = lambda wildcards: f"{RAW_DIR}/{SAMPLES[wildcards.sample]['R2']}"
+        R1 = lambda wc: f"{RAW_DIR}/{SAMPLES[wc.sample]['R1']}",
+        R2 = lambda wc: f"{RAW_DIR}/{SAMPLES[wc.sample]['R2']}"
     output:
         html_R1 = QC_DIR + "/{sample}_R1_fastqc.html",
         html_R2 = QC_DIR + "/{sample}_R2_fastqc.html",

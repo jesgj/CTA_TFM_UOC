@@ -10,4 +10,5 @@ include: "rules/qc.smk"
 rule all: 
     input: 
         # Run QC on all samples 
-        expand( f"{QC_DIR}/{{sample}}_R1_fastqc.html", sample=SAMPLES.keys() ), expand( f"{QC_DIR}/{{sample}}_R2_fastqc.html", sample=SAMPLES.keys() )
+        expand("{QC_DIR}/{sample}_R1_fastqc.html", QC_DIR=QC_DIR, sample=SAMPLES.keys()), 
+        expand("{QC_DIR}/{sample}_R2_fastqc.html", sample=SAMPLES.keys())
