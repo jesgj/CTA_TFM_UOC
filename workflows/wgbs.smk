@@ -1,17 +1,20 @@
-# WGBS module workflow
-RAW_DIR = config["raw_fastqs_dir"]
+# FILE: workflows/wgbs.smk
+# Variables from config
+RAW_DIR = config.get("raw_fastqs_dir")
 SAMPLES = config["samples"]
-QC_DIR = config.get("qc_dir", "results/qc")  # fallback if not defined
+QC_DIR = config.get("qc_dir", "results/wgbs/qc")  # Added fallback default
 
-rule fastqc:
+print(f"RAW_DIR: {RAW_DIR}")
+print(f"SAMPLES: {SAMPLES}")
+print(f"QC_DIR: {QC_DIR}")
+
+# Include shared QC rules
+include: "rules/qc.smk"
+
+# This rule defines the final output of the pipeline
+rule all:
     input:
-        R1=lambda wc: f"{RAW_DIR}/{SAMPLES[wc.sample]['R1']}",
-        R2=lambda wc: f"{RAW_DIR}/{SAMPLES[wc.sample]['R2']}"
-    output:
-        html_R1=f"{QC_DIR}/{{sample}}_R1_fastqc.html",
-        html_R2=f"{QC_DIR}/{{sample}}_R2_fastqc.html",
-        zip_R1=f"{QC_DIR}/{{sample}}_R1_fastqc.zip",
-        zip_R2=f"{QC_DIR}/{{sample}}_R2_fastqc.zip"
-    threads: 2
+        expand("results/wgbs/qc/{sample}_R1_fastqc.html", sample=SAMPLES.keys()),
+        expand("results/wgbs/qc/{sample}_R2_fastqc.html", sample=SAMPLES.keys())
     shell:
-        "fastqc -o {QC_DIR} -t {threads} {input.R1} {input.R2}"
+         "echo DONUTS"

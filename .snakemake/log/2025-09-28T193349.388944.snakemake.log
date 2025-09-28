@@ -1,0 +1,47 @@
+Config file config/config.yaml is extended by additional config specified via the command line.
+Assuming unrestricted shared filesystem usage.
+host: fat41
+Building DAG of jobs...
+MissingInputException in rule all in file "/lustre/home/jlgarcia/CTA_TFM_UOC/workflows/wgbs.smk", line 15:
+Missing input files for rule all:
+    affected files:
+        results/wgbs/qc/zar1l_2_R2_fastqc.html
+        results/wgbs/qc/dazl_2_R2_fastqc.html
+        results/wgbs/qc/dazl_2_R2_fastqc.zip
+        results/wgbs/qc/zar1l_2_R1_fastqc.html
+        results/wgbs/qc/Ctr_1_R2_fastqc.zip
+        results/wgbs/qc/dazl_1_R1_fastqc.zip
+        results/wgbs/qc/Ctr_2_R1_fastqc.zip
+        results/wgbs/qc/dazl_1_R2_fastqc.html
+        results/wgbs/qc/elav2_1_R2_fastqc.html
+        results/wgbs/qc/Ctr_1_R1_fastqc.zip
+        results/wgbs/qc/Ctr_2_R2_fastqc.html
+        results/wgbs/qc/zar1l_1_R1_fastqc.zip
+        results/wgbs/qc/elav2_2_R1_fastqc.zip
+        results/wgbs/qc/Ctr_1_R2_fastqc.html
+        results/wgbs/qc/dazl_2_R1_fastqc.zip
+        results/wgbs/qc/Ctr_2_R1_fastqc.html
+        results/wgbs/qc/elav2_2_R2_fastqc.html
+        results/wgbs/qc/Ctr_2_R2_fastqc.zip
+        results/wgbs/qc/ddx4_1_R1_fastqc.zip
+        results/wgbs/qc/zar1l_2_R2_fastqc.zip
+        results/wgbs/qc/elav2_1_R2_fastqc.zip
+        results/wgbs/qc/ddx4_1_R2_fastqc.zip
+        results/wgbs/qc/dazl_1_R1_fastqc.html
+        results/wgbs/qc/ddx4_1_R2_fastqc.html
+        results/wgbs/qc/zar1l_1_R1_fastqc.html
+        results/wgbs/qc/elav2_1_R1_fastqc.zip
+        results/wgbs/qc/dazl_1_R2_fastqc.zip
+        results/wgbs/qc/ddx4_2_R1_fastqc.zip
+        results/wgbs/qc/zar1l_1_R2_fastqc.html
+        results/wgbs/qc/ddx4_1_R1_fastqc.html
+        results/wgbs/qc/elav2_1_R1_fastqc.html
+        results/wgbs/qc/elav2_2_R1_fastqc.html
+        results/wgbs/qc/ddx4_2_R2_fastqc.html
+        results/wgbs/qc/ddx4_2_R2_fastqc.zip
+        results/wgbs/qc/zar1l_2_R1_fastqc.zip
+        results/wgbs/qc/zar1l_1_R2_fastqc.zip
+        results/wgbs/qc/ddx4_2_R1_fastqc.html
+        results/wgbs/qc/dazl_2_R1_fastqc.html
+        results/wgbs/qc/elav2_2_R2_fastqc.zip
+        results/wgbs/qc/Ctr_1_R1_fastqc.html

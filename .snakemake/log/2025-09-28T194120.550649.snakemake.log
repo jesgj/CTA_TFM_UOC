@@ -1,0 +1,6 @@
+Config file config/config.yaml is extended by additional config specified via the command line.
+TabError in file "<string>", line 17:
+inconsistent use of tabs and spaces in indentation:
+	expand("results/wgbs/qc/{sample}_R1_fastqc.html", sample=SAMPLES.keys()),
+  File "/lustre/home/jlgarcia/CTA_TFM_UOC/.pixi/envs/default/lib/python3.13/tokenize.py", line 586, in _generate_tokens_from_c_tokenizer
+  File "/lustre/home/jlgarcia/CTA_TFM_UOC/.pixi/envs/default/lib/python3.13/tokenize.py", line 582, in _generate_tokens_from_c_tokenizer

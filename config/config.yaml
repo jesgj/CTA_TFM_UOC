@@ -6,9 +6,8 @@ rnaseq:
   threads: 8
 
 wgbs:
-  bismark_genome: "/path/to/bismark/index"
-  raw_fastqs_dir: "data/wgbs_raw_fastqs/"
-  qc_dir: "results/wgbs/qc/"
+  raw_fastqs_dir: "data/wgbs_raw_fastqs"
+  qc_dir: "results/wgbs/qc"
   samples:
     Ctr_1:
       R1: "Ctr_1_S1_L003_R1_001.fastq.gz"
