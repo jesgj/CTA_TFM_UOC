@@ -1,5 +1,6 @@
 # rules/qc.smk - Generic QC rules
 import os
+import glob
 
 # These should be set by the parent workflow before including this file
 RAW_DIR = config["raw_fastqs_dir"]
@@ -16,19 +17,21 @@ if os.path.exists(RAW_DIR):
     files = os.listdir(RAW_DIR)
     print(f"Files in RAW_DIR: {files[:5]}...")  # Show first 5
 
+# Use glob to find all fastq.gz files.
+# This list is used to define the output files for the 'fastqc' rule.
+ALL_FASTQ_FILES = glob.glob(os.path.join(RAW_DIR, '*.fastq.gz'))
+BASENAMES = [os.path.basename(f).replace('.fastq.gz', '') for f in ALL_FASTQ_FILES]
+
 rule fastqc:
     input:
-        R1 = os.path.join(RAW_DIR, "{sample}_R1_001.fastq.gz"),
-        R2 = os.path.join(RAW_DIR, "{sample}_R2_001.fastq.gz")
+        ALL_FASTQ_FILES
     output:
-        html_R1 = os.path.join(QC_DIR, "{sample}_R1_001_fastqc.html"),
-        html_R2 = os.path.join(QC_DIR, "{sample}_R2_001_fastqc.html"),
-        zip_R1  = os.path.join(QC_DIR, "{sample}_R1_001_fastqc.zip"),
-        zip_R2  = os.path.join(QC_DIR, "{sample}_R2_001_fastqc.zip")
+        htmls = expand(os.path.join(QC_DIR, '{basename}_fastqc.html'), basename=BASENAMES),
+        zips  = expand(os.path.join(QC_DIR, '{basename}_fastqc.zip'), basename=BASENAMES)
     params:
         outdir = QC_DIR
     threads: 4
     shell:
         """
-        pixi run fastqc -o {params.outdir} -t {threads} {input.R1} {input.R2}
+        pixi run fastqc -o {params.outdir} -t {threads} {input}
         """
