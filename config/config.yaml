@@ -8,3 +8,5 @@ rnaseq:
 wgbs:
   raw_fastqs_dir: "data/wgbs_raw_fastqs" # in this case we are going to obtain the fastqs programatically
   qc_dir: "results/wgbs/qc"
+  trimmed_dir: "results/wgbs/trimmed_fastqs"
+  qc_trimmed_dir: "results/wgbs/qc_trimmed"
