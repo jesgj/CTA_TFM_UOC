@@ -10,5 +10,10 @@ wgbs:
   qc_dir: "results/wgbs/qc"
   trimmed_dir: "results/wgbs/trimmed_fastqs"
   qc_trimmed_dir: "results/wgbs/qc_trimmed"
+  ref_genome: "ref/genome.fa"
+  alignment_dir: "data/wgbs/raw_bams"
+  dedup_dir: "data/wgbs/dedup_bams"
   fastp:
     extra_args: "-q 20 -l 50 --trim_front1 5"
+  bismark:
+    extra_args: "--non_directional" # Example parameter
