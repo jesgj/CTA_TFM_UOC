@@ -10,3 +10,5 @@ wgbs:
   qc_dir: "results/wgbs/qc"
   trimmed_dir: "results/wgbs/trimmed_fastqs"
   qc_trimmed_dir: "results/wgbs/qc_trimmed"
+  fastp:
+    extra_args: "-q 20 -l 50 --trim_front1 5"

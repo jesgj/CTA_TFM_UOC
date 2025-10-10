@@ -6,6 +6,9 @@ SAMPLES_INFO = config['samples_info']
 TRIMMED_DIR = config["trimmed_dir"]
 QC_TRIMMED_DIR = config["qc_trimmed_dir"]
 
+# Get fastp params from config, with a default of "" if not provided
+FASTP_EXTRA_ARGS = config.get("fastp", {}).get("extra_args", "")
+
 rule fastp_trim:
     """
     Trims paired-end reads using fastp.
@@ -20,6 +23,8 @@ rule fastp_trim:
         trimmed_r2 = os.path.join(TRIMMED_DIR, "{sample}_R2.trimmed.fq.gz"),
         html = os.path.join(TRIMMED_DIR, "{sample}.fastp.html"),
         json = os.path.join(TRIMMED_DIR, "{sample}.fastp.json")
+    params:
+        extra = FASTP_EXTRA_ARGS
     threads: 4
     log:
         os.path.join("logs", "fastp", "{sample}.log")
@@ -28,6 +33,7 @@ rule fastp_trim:
         pixi run fastp -i {input.r1} -I {input.r2} \
         -o {output.trimmed_r1} -O {output.trimmed_r2} \
         -h {output.html} -j {output.json} \
+        {params.extra} \
         -t {threads} &> {log}
         """
 
