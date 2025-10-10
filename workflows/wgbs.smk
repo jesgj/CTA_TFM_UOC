@@ -1,7 +1,6 @@
 # WGBS module workflow
 import os
-import glob
-from snakemake.io import glob_wildcards
+import re
 
 # --- CONFIGURATION ---
 # Define directories from config
@@ -21,6 +20,38 @@ os.makedirs(QC_DIR, exist_ok=True)
 os.makedirs(TRIMMED_DIR, exist_ok=True)
 os.makedirs(QC_TRIMMED_DIR, exist_ok=True)
 
+# --- SAMPLE DISCOVERY ---
+def discover_samples_and_reads(raw_dir):
+    """
+    Scans the raw directory for paired-end fastq files and returns a dictionary
+    mapping sample names to their R1 and R2 file paths.
+    Handles both _R1.fq.gz and _R1_001.fq.gz naming conventions.
+    """
+    samples_info = {}
+    if not os.path.exists(raw_dir):
+        return samples_info
+
+    for f in os.listdir(raw_dir):
+        # The regex now looks for .fq.gz and captures the sample name and read identifier part
+        match = re.match(r'(.+?)(_R1|_R1_001)\.fq\.gz', f)
+        if match:
+            sample_name = match.group(1)
+            r1_part = match.group(2)
+            r2_part = r1_part.replace('_R1', '_R2')
+            
+            r1_path = os.path.join(raw_dir, f)
+            r2_path = os.path.join(raw_dir, f.replace(r1_part, r2_part))
+            
+            if os.path.exists(r2_path):
+                samples_info[sample_name] = {'R1': r1_path, 'R2': r2_path}
+    return samples_info
+
+SAMPLES_INFO = discover_samples_and_reads(RAW_DIR)
+SAMPLES = list(SAMPLES_INFO.keys())
+
+# Make sample info available to included rules
+config['samples_info'] = SAMPLES_INFO
+
 
 # --- MODULE INCLUSION ---
 
@@ -33,21 +64,15 @@ include: "rules/trimming_and_qc.smk"
 
 # --- FINAL TARGETS ---
 
-# Detect samples for final report generation
-SAMPLES, = glob_wildcards(os.path.join(RAW_DIR, "{sample}_R1_001.fastq.gz"))
-
-# Glob all raw fastq files to determine the final output for the 'qc' part of the 'all' rule.
-ALL_RAW_FASTQ_FILES = glob.glob(os.path.join(RAW_DIR, '*.fastq.gz'))
-RAW_BASENAMES = [os.path.basename(f).replace('.fastq.gz', '') for f in ALL_RAW_FASTQ_FILES]
-
-
 # Final target rule for the wgbs workflow
 rule all:
     input:
         # 1. FastQC reports for raw files
-        expand(os.path.join(QC_DIR, "{basename}_fastqc.html"), basename=RAW_BASENAMES),
+        expand(os.path.join(QC_DIR, "{sample}_{read}_raw_fastqc.html"),
+               sample=SAMPLES,
+               read=["R1", "R2"]),
 
         # 2. FastQC reports for trimmed files
-        expand(os.path.join(QC_TRIMMED_DIR, "{sample}_{read}.trimmed_fastqc.html"),
+        expand(os.path.join(QC_TRIMMED_DIR, "{sample}_{read}_trimmed_fastqc.html"),
                sample=SAMPLES,
-               read=["R1_001", "R2_001"])
+               read=["R1", "R2"])

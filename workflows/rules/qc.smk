@@ -1,37 +1,28 @@
-# rules/qc.smk - Generic QC rules
+# rules/qc.smk - Generic QC rules (refactored for per-sample execution)
 import os
-import glob
 
-# These should be set by the parent workflow before including this file
-RAW_DIR = config["raw_fastqs_dir"]
+# This module now expects SAMPLES_INFO to be in the config
+SAMPLES_INFO = config['samples_info']
 QC_DIR = config["qc_dir"]
 
-print(f"RAW_DIR (relative): {RAW_DIR}")
-print(f"RAW_DIR (absolute): {os.path.abspath(RAW_DIR)}")
-print(f"RAW_DIR exists: {os.path.exists(RAW_DIR)}")
-print(f"QC_DIR (relative): {QC_DIR}")
-print(f"QC_DIR (absolute): {os.path.abspath(QC_DIR)}")
-
-# List files in RAW_DIR to verify
-if os.path.exists(RAW_DIR):
-    files = os.listdir(RAW_DIR)
-    print(f"Files in RAW_DIR: {files[:5]}...")  # Show first 5
-
-# Use glob to find all fastq.gz files.
-# This list is used to define the output files for the 'fastqc' rule.
-ALL_FASTQ_FILES = glob.glob(os.path.join(RAW_DIR, '*.fastq.gz'))
-BASENAMES = [os.path.basename(f).replace('.fastq.gz', '') for f in ALL_FASTQ_FILES]
-
-rule fastqc:
+rule fastqc_raw:
+    """
+    Runs FastQC on raw paired-end reads for a single sample.
+    """
     input:
-        ALL_FASTQ_FILES
+        r1 = lambda wildcards: SAMPLES_INFO[wildcards.sample]['R1'],
+        r2 = lambda wildcards: SAMPLES_INFO[wildcards.sample]['R2']
     output:
-        htmls = expand(os.path.join(QC_DIR, '{basename}_fastqc.html'), basename=BASENAMES),
-        zips  = expand(os.path.join(QC_DIR, '{basename}_fastqc.zip'), basename=BASENAMES)
+        html_r1 = os.path.join(QC_DIR, "{sample}_R1_raw_fastqc.html"),
+        html_r2 = os.path.join(QC_DIR, "{sample}_R2_raw_fastqc.html"),
+        zip_r1 = os.path.join(QC_DIR, "{sample}_R1_raw_fastqc.zip"),
+        zip_r2 = os.path.join(QC_DIR, "{sample}_R2_raw_fastqc.zip")
     params:
         outdir = QC_DIR
-    threads: 4
+    threads: 4 # fastqc can use multiple threads for multiple files
+    log:
+        os.path.join("logs", "fastqc_raw", "{sample}.log")
     shell:
         """
-        pixi run fastqc -o {params.outdir} -t {threads} {input}
+        pixi run fastqc -o {params.outdir} -t {threads} {input.r1} {input.r2} &> {log}
         """
