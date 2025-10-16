@@ -10,6 +10,10 @@ TRIMMED_DIR = config["trimmed_dir"]
 QC_TRIMMED_DIR = config["qc_trimmed_dir"]
 ALIGN_DIR = config["alignment_dir"]
 DEDUP_DIR = config["dedup_dir"]
+DEDUP_BAM_QC_DIR = config["dedup_bam_qc_dir"]
+FILTERED_BAM_DIR = config["filtered_bam_dir"]
+SORTED_FILTERED_BAM_DIR = config["sorted_filtered_bam_dir"]
+FILTERED_BAM_QC_DIR = config["filtered_bam_qc_dir"]
 REF_GENOME = config["ref_genome"]
 
 # Make config available to included rules
@@ -19,6 +23,10 @@ config["trimmed_dir"] = TRIMMED_DIR
 config["qc_trimmed_dir"] = QC_TRIMMED_DIR
 config["alignment_dir"] = ALIGN_DIR
 config["dedup_dir"] = DEDUP_DIR
+config["dedup_bam_qc_dir"] = DEDUP_BAM_QC_DIR
+config["filtered_bam_dir"] = FILTERED_BAM_DIR
+config["sorted_filtered_bam_dir"] = SORTED_FILTERED_BAM_DIR
+config["filtered_bam_qc_dir"] = FILTERED_BAM_QC_DIR
 config["ref_genome"] = REF_GENOME
 
 # Ensure output directories exist
@@ -27,6 +35,10 @@ os.makedirs(TRIMMED_DIR, exist_ok=True)
 os.makedirs(QC_TRIMMED_DIR, exist_ok=True)
 os.makedirs(ALIGN_DIR, exist_ok=True)
 os.makedirs(DEDUP_DIR, exist_ok=True)
+os.makedirs(DEDUP_BAM_QC_DIR, exist_ok=True)
+os.makedirs(FILTERED_BAM_DIR, exist_ok=True)
+os.makedirs(SORTED_FILTERED_BAM_DIR, exist_ok=True)
+os.makedirs(FILTERED_BAM_QC_DIR, exist_ok=True)
 
 # --- SAMPLE DISCOVERY ---
 def discover_samples_and_reads(raw_dir):
@@ -62,6 +74,15 @@ include: "rules/trimming_and_qc.smk"
 # 3. Alignment
 include: "rules/alignment.smk"
 
+# 4. QC on Deduplicated BAMs
+include: "rules/bam_qc.smk"
+
+# 5. Filtering and Sorting of BAMs
+include: "rules/filter_bam.smk"
+
+# 6. QC on Filtered BAMs
+include: "rules/filtered_bam_qc.smk"
+
 
 # --- FINAL TARGETS ---
 
@@ -79,4 +100,10 @@ rule all:
                read=["R1", "R2"]),
         
         # 3. Bismark deduplicated alignment files
-        expand(os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"), sample=SAMPLES)
+        expand(os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"), sample=SAMPLES),
+
+        # 4. QC reports for deduplicated BAMs
+        rules.all_dedup_bam_qc.input,
+
+        # 5. QC reports for filtered BAMs
+        rules.all_filtered_bam_qc.input
