@@ -14,6 +14,9 @@ DEDUP_BAM_QC_DIR = config["dedup_bam_qc_dir"]
 FILTERED_BAM_DIR = config["filtered_bam_dir"]
 SORTED_FILTERED_BAM_DIR = config["sorted_filtered_bam_dir"]
 FILTERED_BAM_QC_DIR = config["filtered_bam_qc_dir"]
+MBIAS_DIR = config["mbias_dir"]
+METHYLDACKEL_DIR = config["methyldackel_dir"]
+METHYLDACKEL_MERGECONTEXT_DIR = config["methyldackel_mergecontext_dir"]
 REF_GENOME = config["ref_genome"]
 
 # Make config available to included rules
@@ -27,6 +30,9 @@ config["dedup_bam_qc_dir"] = DEDUP_BAM_QC_DIR
 config["filtered_bam_dir"] = FILTERED_BAM_DIR
 config["sorted_filtered_bam_dir"] = SORTED_FILTERED_BAM_DIR
 config["filtered_bam_qc_dir"] = FILTERED_BAM_QC_DIR
+config["mbias_dir"] = MBIAS_DIR
+config["methyldackel_dir"] = METHYLDACKEL_DIR
+config["methyldackel_mergecontext_dir"] = METHYLDACKEL_MERGECONTEXT_DIR
 config["ref_genome"] = REF_GENOME
 
 # Ensure output directories exist
@@ -39,6 +45,9 @@ os.makedirs(DEDUP_BAM_QC_DIR, exist_ok=True)
 os.makedirs(FILTERED_BAM_DIR, exist_ok=True)
 os.makedirs(SORTED_FILTERED_BAM_DIR, exist_ok=True)
 os.makedirs(FILTERED_BAM_QC_DIR, exist_ok=True)
+os.makedirs(MBIAS_DIR, exist_ok=True)
+os.makedirs(METHYLDACKEL_DIR, exist_ok=True)
+os.makedirs(METHYLDACKEL_MERGECONTEXT_DIR, exist_ok=True)
 
 # --- SAMPLE DISCOVERY ---
 def discover_samples_and_reads(raw_dir):
@@ -72,16 +81,22 @@ include: "rules/qc.smk"
 include: "rules/trimming_and_qc.smk"
 
 # 3. Alignment
-include: "rules/alignment.smk"
+include: "rules/wgbs/alignment.smk"
 
 # 4. QC on Deduplicated BAMs
-include: "rules/bam_qc.smk"
+include: "rules/wgbs/bam_qc.smk"
 
 # 5. Filtering and Sorting of BAMs
-include: "rules/filter_bam.smk"
+include: "rules/wgbs/filter_bam.smk"
 
 # 6. QC on Filtered BAMs
-include: "rules/filtered_bam_qc.smk"
+include: "rules/wgbs/filtered_bam_qc.smk"
+
+# 7. Methylation Bias
+include: "rules/wgbs/mbias.smk"
+
+# 8. Methylation Extraction
+include: "rules/wgbs/methyldackel.smk"
 
 
 # --- FINAL TARGETS ---
@@ -106,4 +121,12 @@ rule all:
         rules.all_dedup_bam_qc.input,
 
         # 5. QC reports for filtered BAMs
-        rules.all_filtered_bam_qc.input
+        rules.all_filtered_bam_qc.input,
+
+        # 6. Mbias reports
+        expand(os.path.join(MBIAS_DIR, "{sample}.options.txt"), sample=SAMPLES),
+        os.path.join(MBIAS_DIR, "all_samples_mbias_options.tsv"),
+
+        # 7. Methylation extraction reports
+        expand(os.path.join(METHYLDACKEL_DIR, "{sample}_methylKit.txt"), sample=SAMPLES),
+        expand(os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}.bedGraph"), sample=SAMPLES)

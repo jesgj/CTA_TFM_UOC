@@ -17,9 +17,16 @@ wgbs:
   filtered_bam_dir: "data/wgbs/filtered_bams"
   sorted_filtered_bam_dir: "data/wgbs/sorted_filtered_bams"
   filtered_bam_qc_dir: "results/wgbs/filtered_bam_qc"
+  mbias_dir: "results/wgbs/mbias"
+  methyldackel_dir: "results/wgbs/methyldackel"
+  methyldackel_mergecontext_dir: "results/wgbs/methyldackel_mergecontext"
   fastp:
     extra_args: "-q 20 -l 50 --trim_front1 5"
   bismark:
     extra_args: "--non_directional" # Example parameter
   sambamba:
     extra_args: "not unmapped" # Example filter
+  methyldackel_mbias:
+    extra_args: ""
+  methyldackel_extract:
+    extra_args: ""
