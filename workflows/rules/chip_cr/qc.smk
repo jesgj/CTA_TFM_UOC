@@ -14,10 +14,10 @@ rule fastqc_raw_pe:
         r1 = lambda wildcards: SAMPLES_INFO[wildcards.sample]['R1'],
         r2 = lambda wildcards: SAMPLES_INFO[wildcards.sample]['R2']
     output:
-        html_r1 = os.path.join(QC_DIR, "{sample}_R1_raw_fastqc.html"),
-        html_r2 = os.path.join(QC_DIR, "{sample}_R2_raw_fastqc.html"),
-        zip_r1 = os.path.join(QC_DIR, "{sample}_R1_raw_fastqc.zip"),
-        zip_r2 = os.path.join(QC_DIR, "{sample}_R2_raw_fastqc.zip")
+        html_r1 = os.path.join(QC_DIR, "{sample}_R1_fastqc.html"),
+        html_r2 = os.path.join(QC_DIR, "{sample}_R2_fastqc.html"),
+        zip_r1 = os.path.join(QC_DIR, "{sample}_R1_fastqc.zip"),
+        zip_r2 = os.path.join(QC_DIR, "{sample}_R2_fastqc.zip")
     params:
         outdir = QC_DIR
     threads: 2
@@ -35,8 +35,8 @@ rule fastqc_raw_se:
     input:
         r1 = lambda wildcards: SAMPLES_INFO[wildcards.sample]['R1']
     output:
-        html = os.path.join(QC_DIR, "{sample}_SE_raw_fastqc.html"),
-        zip = os.path.join(QC_DIR, "{sample}_SE_raw_fastqc.zip")
+        html = os.path.join(QC_DIR, "{sample}_fastqc.html"),
+        zip = os.path.join(QC_DIR, "{sample}_fastqc.zip")
     params:
         outdir = QC_DIR
     threads: 1

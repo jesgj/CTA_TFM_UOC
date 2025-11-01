@@ -66,10 +66,10 @@ def discover_samples_chip_cr(raw_dir):
         if not f.endswith((".fq.gz", ".fastq.gz")):
             continue
         
-        match = re.match(r"(.+?)(_[12])\.(fastq|fq)\.gz", f)
+        match = re.match(r"(.+?)_(?:R)?([12])\.(fastq|fq)\.gz$", f)
         if match:
             sample = match.group(1)
-            read = match.group(2)[1:] # from "_1" to "1"
+            read = match.group(2) # from "1" or "2"
             pe_files[sample][read] = os.path.join(raw_dir, f)
         else:
             # If it doesn't match PE pattern, it's a potential SE file
@@ -173,10 +173,10 @@ def get_all_final_outputs(samples_info):
     # Add raw QC outputs
     for sample, info in samples_info.items():
         if info['type'] == 'PE':
-            outputs.append(os.path.join(QC_DIR, f"{sample}_R1_raw_fastqc.html"))
-            outputs.append(os.path.join(QC_DIR, f"{sample}_R2_raw_fastqc.html"))
+            outputs.append(os.path.join(QC_DIR, f"{sample}_R1_fastqc.html"))
+            outputs.append(os.path.join(QC_DIR, f"{sample}_R2_fastqc.html"))
         else: # SE
-            outputs.append(os.path.join(QC_DIR, f"{sample}_SE_raw_fastqc.html"))
+            outputs.append(os.path.join(QC_DIR, f"{sample}_fastqc.html"))
 
     # Add trimmed QC outputs
     for sample, info in samples_info.items():
