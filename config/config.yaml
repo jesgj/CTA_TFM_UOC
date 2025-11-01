@@ -1,4 +1,4 @@
-pipeline: "wgbs"  # Change to "rnaseq" to change the pipeline
+pipeline: "chip_cr"  # Change to "rnaseq" to change the pipeline
 
 rnaseq:
   genome_index: "/path/to/rnaseq/index"
@@ -30,3 +30,38 @@ wgbs:
     extra_args: ""
   methyldackel_extract:
     extra_args: ""
+
+chip_cr:
+  raw_fastqs_dir: "data/chip_seq_raw_fastqs"
+  qc_dir: "results/chipseq_cutrun/qc_raw"
+  ref_genome: "ref/genome.fa"
+  trimmed_dir: "results/chipseq_cutrun/trimmed_fastqs"
+  qc_trimmed_dir: "results/chipseq_cutrun/qc_trimmed"
+  alignment_dir: "results/chipseq_cutrun/aligned_bams"
+  bowtie2_index_dir: "ref/bowtie2"
+  bam_qc_dir: "results/chipseq_cutrun/bam_qc"
+  filtered_bam_dir: "results/chipseq_cutrun/filtered_bams"
+  filtered_bam_qc_dir: "results/chipseq_cutrun/filtered_bam_qc"
+  deeptools_dir: "results/chipseq_cutrun/deeptools"
+  bigwig_dir: "results/chipseq_cutrun/bigwigs"
+  subtracted_bigwig_dir: "results/chipseq_cutrun/subtracted_bigwigs"
+  fastp:
+    extra_args: "-q 20 -l 50"
+  bowtie2:
+    extra_args: ""
+  sambamba:
+    markdup_extra_args: ""
+    view_extra_args: "not unmapped"
+  deeptools:
+    multiBamSummary:
+      extra_args: "--binSize 10000"
+    plotCorrelation:
+      extra_args: "--corMethod spearman --skipZeros"
+    plotFingerprint:
+      extra_args: ""
+    bamCoverage:
+      normalize_using: "BPM"
+      extra_args: "--effectiveGenomeSize 2913022398" # Example for hg38, user should change
+    bigwigCompare:
+      method: "subtract"
+      extra_args: ""

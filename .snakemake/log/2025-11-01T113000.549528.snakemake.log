@@ -1,0 +1,3 @@
+Config file config/config.yaml is extended by additional config specified via the command line.
+RuleException in file "/home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/trimming_and_qc.smk", line 40:
+Only input files can be specified as functions

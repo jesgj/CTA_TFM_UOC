@@ -1,0 +1,232 @@
+Config file config/config.yaml is extended by additional config specified via the command line.
+Lints for snakefile /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/wgbs.smk:
+    * Mixed rules and functions in same snakefile.:
+      Small one-liner functions used only once should be defined as lambda
+      expressions. Other functions should be collected in a common module, e.g.
+      'rules/common.smk'. This makes the workflow steps more readable.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/modularization.html#includes
+
+Lints for snakefile /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/chipseq_cutrun.smk:
+    * Mixed rules and functions in same snakefile.:
+      Small one-liner functions used only once should be defined as lambda
+      expressions. Other functions should be collected in a common module, e.g.
+      'rules/common.smk'. This makes the workflow steps more readable.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/modularization.html#includes
+
+Lints for snakefile /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/chipseq_cutrun/mapping.smk:
+    * Mixed rules and functions in same snakefile.:
+      Small one-liner functions used only once should be defined as lambda
+      expressions. Other functions should be collected in a common module, e.g.
+      'rules/common.smk'. This makes the workflow steps more readable.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/modularization.html#includes
+
+Lints for rule wgbs_fastqc_raw (line 15, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/qc.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+    * Param outdir is a prefix of input or output file but hardcoded:
+      If this is meant to represent a file path prefix, it will fail when
+      running workflow in environments without a shared filesystem. Instead,
+      provide a function that infers the appropriate prefix from the input or
+      output file, e.g.: lambda w, input: os.path.splitext(input[0])[0]
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules
+      https://snakemake.readthedocs.io/en/stable/tutorial/advanced.html#tutorial-input-functions
+
+Lints for rule wgbs_fastp_trim (line 20, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/trimming_and_qc.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_fastqc_trimmed (line 46, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/trimming_and_qc.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+    * Param outdir is a prefix of input or output file but hardcoded:
+      If this is meant to represent a file path prefix, it will fail when
+      running workflow in environments without a shared filesystem. Instead,
+      provide a function that infers the appropriate prefix from the input or
+      output file, e.g.: lambda w, input: os.path.splitext(input[0])[0]
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules
+      https://snakemake.readthedocs.io/en/stable/tutorial/advanced.html#tutorial-input-functions
+
+Lints for rule wgbs_bismark_genome_preparation (line 16, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/alignment.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+    * Param ref_dir is a prefix of input or output file but hardcoded:
+      If this is meant to represent a file path prefix, it will fail when
+      running workflow in environments without a shared filesystem. Instead,
+      provide a function that infers the appropriate prefix from the input or
+      output file, e.g.: lambda w, input: os.path.splitext(input[0])[0]
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules
+      https://snakemake.readthedocs.io/en/stable/tutorial/advanced.html#tutorial-input-functions
+
+Lints for rule wgbs_bismark_alignment (line 34, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/alignment.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+    * Param ref_dir is a prefix of input or output file but hardcoded:
+      If this is meant to represent a file path prefix, it will fail when
+      running workflow in environments without a shared filesystem. Instead,
+      provide a function that infers the appropriate prefix from the input or
+      output file, e.g.: lambda w, input: os.path.splitext(input[0])[0]
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules
+      https://snakemake.readthedocs.io/en/stable/tutorial/advanced.html#tutorial-input-functions
+    * Param align_dir is a prefix of input or output file but hardcoded:
+      If this is meant to represent a file path prefix, it will fail when
+      running workflow in environments without a shared filesystem. Instead,
+      provide a function that infers the appropriate prefix from the input or
+      output file, e.g.: lambda w, input: os.path.splitext(input[0])[0]
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules
+      https://snakemake.readthedocs.io/en/stable/tutorial/advanced.html#tutorial-input-functions
+
+Lints for rule wgbs_deduplicate_bismark (line 61, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/alignment.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_samtools_stats_dedup (line 12, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/bam_qc.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_samtools_flagstat_dedup (line 28, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/bam_qc.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_picard_collect_alignment_metrics_dedup (line 44, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/bam_qc.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_sambamba_filter (line 12, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/filter_bam.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_sambamba_sort (line 30, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/filter_bam.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_samtools_stats_filtered (line 12, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/filtered_bam_qc.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_samtools_flagstat_filtered (line 28, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/filtered_bam_qc.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_picard_collect_alignment_metrics_filtered (line 44, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/filtered_bam_qc.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_methyldackel_mbias (line 13, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/mbias.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+    * Param prefix is a prefix of input or output file but hardcoded:
+      If this is meant to represent a file path prefix, it will fail when
+      running workflow in environments without a shared filesystem. Instead,
+      provide a function that infers the appropriate prefix from the input or
+      output file, e.g.: lambda w, input: os.path.splitext(input[0])[0]
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules
+      https://snakemake.readthedocs.io/en/stable/tutorial/advanced.html#tutorial-input-functions
+
+Lints for rule wgbs_aggregate_mbias_options (line 38, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/mbias.smk):
+    * No log directive defined:
+      Without a log directive, all output will be printed to the terminal. In
+      distributed environments, this means that errors are harder to discover.
+      In local environments, output of concurrent jobs will be mixed and become
+      unreadable.
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+
+Lints for rule wgbs_methyldackel_extract_methylkit (line 15, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/methyldackel.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+    * Param output_prefix is a prefix of input or output file but hardcoded:
+      If this is meant to represent a file path prefix, it will fail when
+      running workflow in environments without a shared filesystem. Instead,
+      provide a function that infers the appropriate prefix from the input or
+      output file, e.g.: lambda w, input: os.path.splitext(input[0])[0]
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules
+      https://snakemake.readthedocs.io/en/stable/tutorial/advanced.html#tutorial-input-functions
+
+Lints for rule wgbs_methyldackel_extract_mergecontext (line 38, /home/jlgaralc/MASTER_UOC/TERCER_SEMESTRE/TFM/CTA_TFM_UOC/workflows/rules/wgbs/methyldackel.smk):
+    * Specify a conda environment or container for each rule.:
+      This way, the used software for each specific step is documented, and the
+      workflow can be executed on any machine without prerequisites.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#integrated-package-management
+      https://snakemake.readthedocs.io/en/latest/snakefiles/deployment.html#running-jobs-in-containers
+

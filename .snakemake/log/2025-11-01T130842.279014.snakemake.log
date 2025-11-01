@@ -1,0 +1,5 @@
+Assuming unrestricted shared filesystem usage.
+host: mintHP
+Building DAG of jobs...
+MissingRuleException:
+No rule to produce results/chipseq_cutrun/bigwigs/muscle_rep1.vs_input.bw (if you use input functions make sure that they don't raise unexpected exceptions).
