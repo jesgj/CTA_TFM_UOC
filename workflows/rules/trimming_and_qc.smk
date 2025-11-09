@@ -5,20 +5,18 @@ import os
 SAMPLES_INFO = config['samples_info']
 TRIMMED_DIR = config["trimmed_dir"]
 QC_TRIMMED_DIR = config["qc_trimmed_dir"]
-
-# Get fastp params from config, with a default of "" if not provided
 FASTP_EXTRA_ARGS = config.get("fastp", {}).get("extra_args", "")
+
+# --- Trimming ---
 
 rule fastp_trim:
     """
     Trims paired-end reads using fastp.
-    Input paths are now determined by a function.
     """
     input:
         r1 = lambda wildcards: SAMPLES_INFO[wildcards.sample]['R1'],
         r2 = lambda wildcards: SAMPLES_INFO[wildcards.sample]['R2']
     output:
-        # Output is now standardized
         trimmed_r1 = os.path.join(TRIMMED_DIR, "{sample}_R1.trimmed.fq.gz"),
         trimmed_r2 = os.path.join(TRIMMED_DIR, "{sample}_R2.trimmed.fq.gz"),
         html = os.path.join(TRIMMED_DIR, "{sample}.fastp.html"),
@@ -27,7 +25,7 @@ rule fastp_trim:
         extra = FASTP_EXTRA_ARGS
     threads: 4
     log:
-        os.path.join("logs", "fastp", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "fastp", "{sample}_pe.log")
     shell:
         """
         pixi run fastp -i {input.r1} -I {input.r2} \
@@ -37,26 +35,80 @@ rule fastp_trim:
         -t {threads} &> {log}
         """
 
+rule fastp_trim_se:
+    """
+    Trims single-end reads using fastp.
+    """
+    input:
+        r1 = lambda wildcards: SAMPLES_INFO[wildcards.sample]['R1']
+    output:
+        trimmed_r1 = os.path.join(TRIMMED_DIR, "{sample}_SE.trimmed.fq.gz"),
+        html = os.path.join(TRIMMED_DIR, "{sample}_se.fastp.html"),
+        json = os.path.join(TRIMMED_DIR, "{sample}_se.fastp.json")
+    wildcard_constraints:
+        sample=r"^(?!.*_R[12]$).*"
+    params:
+        extra = FASTP_EXTRA_ARGS
+    threads: 4
+    log:
+        os.path.join("logs", config["pipeline"], "fastp", "{sample}_se.log")
+    shell:
+        """
+        pixi run fastp -i {input.r1} \
+        -o {output.trimmed_r1} \
+        -h {output.html} -j {output.json} \
+        {params.extra} \
+        -t {threads} &> {log}
+        """
+
+# --- QC on Trimmed ---
+
 rule fastqc_trimmed:
     """
     Runs FastQC on trimmed paired-end reads.
     """
     input:
-        # Input now uses the standardized output from fastp_trim
         r1 = os.path.join(TRIMMED_DIR, "{sample}_R1.trimmed.fq.gz"),
         r2 = os.path.join(TRIMMED_DIR, "{sample}_R2.trimmed.fq.gz")
     output:
-        # Output is also standardized
         html_r1 = os.path.join(QC_TRIMMED_DIR, "{sample}_R1_trimmed_fastqc.html"),
         html_r2 = os.path.join(QC_TRIMMED_DIR, "{sample}_R2_trimmed_fastqc.html"),
         zip_r1 = os.path.join(QC_TRIMMED_DIR, "{sample}_R1_trimmed_fastqc.zip"),
         zip_r2 = os.path.join(QC_TRIMMED_DIR, "{sample}_R2_trimmed_fastqc.zip")
     params:
         outdir = QC_TRIMMED_DIR
-    threads: 4
+    threads: 2
     log:
-        os.path.join("logs", "fastqc_trimmed", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "fastqc_trimmed", "{sample}_pe.log")
     shell:
         """
         pixi run fastqc -o {params.outdir} -t {threads} {input.r1} {input.r2} &> {log}
+        mv {params.outdir}/{wildcards.sample}_R1.fastqc.html {output.html_r1}
+        mv {params.outdir}/{wildcards.sample}_R2.fastqc.html {output.html_r2}
+        mv {params.outdir}/{wildcards.sample}_R1.fastqc.zip {output.zip_r1}
+        mv {params.outdir}/{wildcards.sample}_R2.fastqc.zip {output.zip_r2}
+        """
+
+
+rule fastqc_trimmed_se:
+    """
+    Runs FastQC on trimmed single-end reads.
+    """
+    input:
+        r1 = os.path.join(TRIMMED_DIR, "{sample}_SE.trimmed.fq.gz")
+    output:
+        html = os.path.join(QC_TRIMMED_DIR, "{sample}_SE_trimmed_fastqc.html"),
+        zip = os.path.join(QC_TRIMMED_DIR, "{sample}_SE_trimmed_fastqc.zip")
+    wildcard_constraints:
+        sample=r"^(?!.*_R[12]$).*"
+    params:
+        outdir = QC_TRIMMED_DIR
+    threads: 1
+    log:
+        os.path.join("logs", config["pipeline"], "fastqc_trimmed", "{sample}_se.log")
+    shell:
+        """
+        pixi run fastqc -o {params.outdir} -t {threads} {input.r1} &> {log}
+        mv {params.outdir}/{wildcards.sample}_SE.fastqc.html {output.html}
+        mv {params.outdir}/{wildcards.sample}_SE.fastqc.zip {output.zip}
         """

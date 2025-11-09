@@ -105,14 +105,10 @@ include: "rules/wgbs/methyldackel.smk"
 rule all:
     input:
         # 1. FastQC reports for raw files
-        expand(os.path.join(QC_DIR, "{sample}_{read}_raw_fastqc.html"),
-               sample=SAMPLES,
-               read=["R1", "R2"]),
+        [os.path.join(QC_DIR, f"{sample}_{read}_raw_fastqc.html") for sample in SAMPLES for read in ["R1", "R2"]],
 
         # 2. FastQC reports for trimmed files
-        expand(os.path.join(QC_TRIMMED_DIR, "{sample}_{read}_trimmed_fastqc.html"),
-               sample=SAMPLES,
-               read=["R1", "R2"]),
+        [os.path.join(QC_TRIMMED_DIR, f"{sample}_{read}_trimmed_fastqc.html") for sample in SAMPLES for read in ["R1", "R2"]],
         
         # 3. Bismark deduplicated alignment files
         expand(os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"), sample=SAMPLES),

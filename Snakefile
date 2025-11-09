@@ -2,19 +2,25 @@
 configfile: "config/config.yaml"
 
 # Import modules for different pipelines
+rnaseq_config = config["rnaseq"].copy()
+rnaseq_config["pipeline"] = config["pipeline"]
 module rnaseq:
     snakefile: "workflows/rnaseq.smk"
-    config: config["rnaseq"]
+    config: rnaseq_config
     #prefix: "rnaseq_"
 
+wgbs_config = config["wgbs"].copy()
+wgbs_config["pipeline"] = config["pipeline"]
 module wgbs:
     snakefile: "workflows/wgbs.smk"
-    config: config["wgbs"]
+    config: wgbs_config
     #prefix: "wgbs_"
 
+chip_cr_config = config["chip_cr"].copy()
+chip_cr_config["pipeline"] = config["pipeline"]
 module chip_cr:
     snakefile: "workflows/chip_cr.smk"
-    config: config["chip_cr"]
+    config: chip_cr_config
 
 # Conditional rule import and rule_all definition
 if config["pipeline"] == "rnaseq":

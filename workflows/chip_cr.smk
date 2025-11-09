@@ -43,9 +43,6 @@ os.makedirs(FILTERED_BAM_QC_DIR, exist_ok=True)
 os.makedirs(DEEPTOOLS_DIR, exist_ok=True)
 os.makedirs(BIGWIG_DIR, exist_ok=True)
 os.makedirs(SUBTRACTED_BIGWIG_DIR, exist_ok=True)
-os.makedirs(os.path.join("logs", "chipseq_cutrun", "fastqc_raw"), exist_ok=True)
-os.makedirs(os.path.join("logs", "chipseq_cutrun", "fastp"), exist_ok=True)
-os.makedirs(os.path.join("logs", "chipseq_cutrun", "fastqc_trimmed"), exist_ok=True)
 os.makedirs(os.path.join("logs", "chipseq_cutrun", "bowtie2_align"), exist_ok=True)
 os.makedirs(os.path.join("logs", "chipseq_cutrun", "bam_qc"), exist_ok=True)
 os.makedirs(os.path.join("logs", "chipseq_cutrun", "sambamba_filter"), exist_ok=True)
@@ -141,10 +138,10 @@ config['subtraction_pairs'] = SUBTRACTION_PAIRS
 # --- MODULE INCLUSION ---
 
 # 1. QC on raw files
-include: "rules/chip_cr/qc.smk"
+include: "rules/qc.smk"
 
 # 2. Trimming and QC on trimmed files
-include: "rules/chip_cr/trimming_and_qc.smk"
+include: "rules/trimming_and_qc.smk"
 
 # 3. Alignment
 include: "rules/chip_cr/alignment.smk"
@@ -173,10 +170,10 @@ def get_all_final_outputs(samples_info):
     # Add raw QC outputs
     for sample, info in samples_info.items():
         if info['type'] == 'PE':
-            outputs.append(os.path.join(QC_DIR, f"{sample}_R1_fastqc.html"))
-            outputs.append(os.path.join(QC_DIR, f"{sample}_R2_fastqc.html"))
+            outputs.append(os.path.join(QC_DIR, f"{sample}_R1_raw_fastqc.html"))
+            outputs.append(os.path.join(QC_DIR, f"{sample}_R2_raw_fastqc.html"))
         else: # SE
-            outputs.append(os.path.join(QC_DIR, f"{sample}_fastqc.html"))
+            outputs.append(os.path.join(QC_DIR, f"{sample}_raw_fastqc.html"))
 
     # Add trimmed QC outputs
     for sample, info in samples_info.items():

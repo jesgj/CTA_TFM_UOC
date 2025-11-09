@@ -1,9 +1,22 @@
 pipeline: "chip_cr"  # Change to "rnaseq" to change the pipeline
 
 rnaseq:
-  genome_index: "/path/to/rnaseq/index"
-  samples: ["S1", "S2"]
-  threads: 8
+  raw_fastqs_dir: "data/rnaseq_raw_fastqs"
+  qc_dir: "results/rnaseq/qc_raw"
+  trimmed_dir: "results/rnaseq/trimmed_fastqs"
+  qc_trimmed_dir: "results/rnaseq/qc_trimmed"
+  # Kallisto pseudo-alignment
+  transcriptome_fasta: "ref/transcriptome.fa.gz"
+  kallisto_index: "ref/kallisto.idx"
+  kallisto_output_dir: "results/rnaseq/kallisto"
+  kallisto:
+    extra_args: "--bootstrap-samples=100" # Number of bootstrap samples for kallisto quant
+  # HISAT2 alignment
+  ref_genome: "ref/genome.fa"
+  hisat2_index_dir: "ref/hisat2"
+  alignment_dir: "results/rnaseq/aligned_bams"
+  hisat2:
+    extra_args: ""
 
 wgbs:
   raw_fastqs_dir: "data/wgbs_raw_fastqs" # in this case we are going to obtain the fastqs programatically
