@@ -51,49 +51,8 @@ os.makedirs(os.path.join("logs", "chipseq_cutrun", "bamCoverage"), exist_ok=True
 
 
 # --- SAMPLE DISCOVERY ---
-def discover_samples_chip_cr(raw_dir):
-    if not os.path.exists(raw_dir):
-        return {}, []
-
-    pe_files = defaultdict(dict)
-    se_files = {}
-    
-    # First, find all potential PE files
-    for f in os.listdir(raw_dir):
-        if not f.endswith((".fq.gz", ".fastq.gz")):
-            continue
-        
-        match = re.match(r"(.+?)_(?:R)?([12])\.(fastq|fq)\.gz$", f)
-        if match:
-            sample = match.group(1)
-            read = match.group(2) # from "1" or "2"
-            pe_files[sample][read] = os.path.join(raw_dir, f)
-        else:
-            # If it doesn't match PE pattern, it's a potential SE file
-            match = re.match(r"(.+?)\.(fastq|fq)\.gz", f)
-            if match:
-                sample = match.group(1)
-                se_files[sample] = os.path.join(raw_dir, f)
-
-    samples_info = {}
-    # Process PE files
-    for sample, reads in pe_files.items():
-        if '1' in reads and '2' in reads:
-            samples_info[sample] = {'R1': reads['1'], 'R2': reads['2'], 'type': 'PE'}
-            # If a file was mistakenly identified as SE, remove it
-            if sample in se_files:
-                del se_files[sample]
-
-    # Process remaining as SE files
-    for sample, path in se_files.items():
-        # Make sure it's not a leftover from an incomplete PE pair
-        if sample not in samples_info:
-            samples_info[sample] = {'R1': path, 'R2': '', 'type': 'SE'}
-            
-    return samples_info, list(samples_info.keys())
-
-SAMPLES_INFO, SAMPLES = discover_samples_chip_cr(RAW_DIR)
-
+SAMPLES_INFO = config.get("samples_info", {})
+SAMPLES = list(SAMPLES_INFO.keys())
 config['samples_info'] = SAMPLES_INFO
 
 def get_subtraction_pairs(samples_info, bigwig_dir):

@@ -50,25 +50,8 @@ os.makedirs(METHYLDACKEL_DIR, exist_ok=True)
 os.makedirs(METHYLDACKEL_MERGECONTEXT_DIR, exist_ok=True)
 
 # --- SAMPLE DISCOVERY ---
-def discover_samples_and_reads(raw_dir):
-    samples_info = {}
-    if not os.path.exists(raw_dir):
-        return samples_info
-    for f in os.listdir(raw_dir):
-        match = re.match(r'(.+?)(_R1|_R1_001)\.(fq|fastq)\.gz$', f)
-        if match:
-            sample_name = match.group(1)
-            r1_part = match.group(2)
-            r2_part = r1_part.replace('_R1', '_R2')
-            r1_path = os.path.join(raw_dir, f)
-            r2_path = os.path.join(raw_dir, f.replace(r1_part, r2_part))
-            if os.path.exists(r2_path):
-                samples_info[sample_name] = {'R1': r1_path, 'R2': r2_path}
-    return samples_info
-
-SAMPLES_INFO = discover_samples_and_reads(RAW_DIR)
+SAMPLES_INFO = config.get("samples_info", {})
 SAMPLES = list(SAMPLES_INFO.keys())
-
 config['samples_info'] = SAMPLES_INFO
 
 

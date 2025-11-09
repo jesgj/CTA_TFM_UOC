@@ -45,29 +45,7 @@ os.makedirs(os.path.join("logs", "hisat2_build"), exist_ok=True)
 
 
 # --- SAMPLE DISCOVERY ---
-def discover_samples_rnaseq(raw_dir):
-    samples_info = {}
-    if not os.path.exists(raw_dir):
-        return {}
-    
-    pe_files = defaultdict(dict)
-    for f in os.listdir(raw_dir):
-        if not f.endswith((".fq.gz", ".fastq.gz")):
-            continue
-        
-        match = re.match(r"(.+?)_(?:R)?([12])\.(fastq|fq)\.gz$", f)
-        if match:
-            sample = match.group(1)
-            read = match.group(2)
-            pe_files[sample][read] = os.path.join(raw_dir, f)
-
-    for sample, reads in pe_files.items():
-        if '1' in reads and '2' in reads:
-            samples_info[sample] = {'R1': reads['1'], 'R2': reads['2']}
-            
-    return samples_info
-
-SAMPLES_INFO = discover_samples_rnaseq(RAW_DIR)
+SAMPLES_INFO = config.get("samples_info", {})
 SAMPLES = list(SAMPLES_INFO.keys())
 config['samples_info'] = SAMPLES_INFO
 

@@ -2,6 +2,16 @@ pipeline: "chip_cr"  # Change to "rnaseq" to change the pipeline
 
 rnaseq:
   raw_fastqs_dir: "data/rnaseq_raw_fastqs"
+  samples_info:
+    Ctl_1:
+      R1: "data/rnaseq_raw_fastqs/Ctl_1_R1.fq.gz"
+      R2: "data/rnaseq_raw_fastqs/Ctl_1_R2.fq.gz"
+    Ctrl_1:
+      R1: "data/rnaseq_raw_fastqs/Ctrl_1_R1.fq.gz"
+      R2: "data/rnaseq_raw_fastqs/Ctrl_1_R2.fq.gz"
+    Tissue_1:
+      R1: "data/rnaseq_raw_fastqs/Tissue_1_R1.fq.gz"
+      R2: "data/rnaseq_raw_fastqs/Tissue_1_R2.fq.gz"
   qc_dir: "results/rnaseq/qc_raw"
   trimmed_dir: "results/rnaseq/trimmed_fastqs"
   qc_trimmed_dir: "results/rnaseq/qc_trimmed"
@@ -20,6 +30,13 @@ rnaseq:
 
 wgbs:
   raw_fastqs_dir: "data/wgbs_raw_fastqs" # in this case we are going to obtain the fastqs programatically
+  samples_info:
+    Ctrl_1:
+      R1: "data/wgbs_raw_fastqs/Ctrl_1_R1_001.fq.gz"
+      R2: "data/wgbs_raw_fastqs/Ctrl_1_R2_001.fq.gz"
+    Tissue_1:
+      R1: "data/wgbs_raw_fastqs/Tissue_1_R1.fq.gz"
+      R2: "data/wgbs_raw_fastqs/Tissue_1_R2.fq.gz"
   qc_dir: "results/wgbs/qc"
   trimmed_dir: "results/wgbs/trimmed_fastqs"
   qc_trimmed_dir: "results/wgbs/qc_trimmed"
@@ -46,6 +63,39 @@ wgbs:
 
 chip_cr:
   raw_fastqs_dir: "data/chip_seq_raw_fastqs"
+  samples_info:
+    liver_input_rep1:
+      R1: "data/chip_seq_raw_fastqs/liver_input_rep1_1.fastq.gz"
+      R2: "data/chip_seq_raw_fastqs/liver_input_rep1_2.fastq.gz"
+      type: "PE"
+    liver_input_rep2:
+      R1: "data/chip_seq_raw_fastqs/liver_input_rep2_1.fastq.gz"
+      R2: "data/chip_seq_raw_fastqs/liver_input_rep2_2.fastq.gz"
+      type: "PE"
+    liver_rep1:
+      R1: "data/chip_seq_raw_fastqs/liver_rep1_1.fastq.gz"
+      R2: "data/chip_seq_raw_fastqs/liver_rep1_2.fastq.gz"
+      type: "PE"
+    liver_rep2:
+      R1: "data/chip_seq_raw_fastqs/liver_rep2_1.fastq.gz"
+      R2: "data/chip_seq_raw_fastqs/liver_rep2_2.fastq.gz"
+      type: "PE"
+    muscle_input_rep1:
+      R1: "data/chip_seq_raw_fastqs/muscle_input_rep1_1.fastq.gz"
+      R2: "data/chip_seq_raw_fastqs/muscle_input_rep1_2.fastq.gz"
+      type: "PE"
+    muscle_input_rep2:
+      R1: "data/chip_seq_raw_fastqs/muscle_input_rep2_1.fastq.gz"
+      R2: "data/chip_seq_raw_fastqs/muscle_input_rep2_2.fastq.gz"
+      type: "PE"
+    muscle_rep1:
+      R1: "data/chip_seq_raw_fastqs/muscle_rep1_1.fastq.gz"
+      R2: "data/chip_seq_raw_fastqs/muscle_rep1_2.fastq.gz"
+      type: "PE"
+    muscle_rep2:
+      R1: "data/chip_seq_raw_fastqs/muscle_rep2_1.fastq.gz"
+      R2: "data/chip_seq_raw_fastqs/muscle_rep2_2.fastq.gz"
+      type: "PE"
   qc_dir: "results/chipseq_cutrun/qc_raw"
   ref_genome: "ref/genome.fa"
   trimmed_dir: "results/chipseq_cutrun/trimmed_fastqs"
