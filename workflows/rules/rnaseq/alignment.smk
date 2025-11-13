@@ -29,7 +29,7 @@ rule hisat2_build:
     log:
         os.path.join("logs", "hisat2_build.log")
     shell:
-        "pixi run hisat2-build {input.ref} {params.prefix} &> {log} && touch {output.sentinel}"
+        "pixi run hisat2-build {input.ref} {params.prefix} > {log}.out 2> {log}.err"
 
 rule hisat2_align_pe:
     """

@@ -28,7 +28,7 @@ rule bismark_genome_preparation:
         "logs/bismark_genome_preparation.log"
     shell:
         """
-        pixi run bismark_genome_preparation --bowtie2 --verbose {params.ref_dir} &> {log}
+        pixi run bismark_genome_preparation --bowtie2 --verbose {params.ref_dir} > {log}.out 2> {log}.err
         """
 
 rule bismark_alignment:
@@ -55,7 +55,7 @@ rule bismark_alignment:
         pixi run bismark --bowtie2 -p {params.parallel} {params.extra} \
         --genome {params.ref_dir} \
         -1 {input.r1} -2 {input.r2} \
-        -o {params.align_dir} --basename {wildcards.sample} &> {log}
+        -o {params.align_dir} --basename {wildcards.sample} > {log}.out 2> {log}.err
         """
 
 rule deduplicate_bismark:

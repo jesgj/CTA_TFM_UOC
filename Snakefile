@@ -24,8 +24,11 @@ module chip_cr:
 
 # Conditional rule import and rule_all definition
 if config["pipeline"] == "rnaseq":
-    use rule * from rnaseq
-    use rule all from rnaseq
+    use rule * from rnaseq as rnaseq_*
+    use rule all from rnaseq as rnaseq_all
+
+    rule all:
+        input: rules.rnaseq_all.input
 elif config["pipeline"] == "wgbs":
     use rule * from wgbs as wgbs_*
     use rule all from wgbs as wgbs_all
@@ -36,7 +39,7 @@ elif config["pipeline"] == "wgbs":
 elif config["pipeline"] == "chip_cr":
     use rule * from chip_cr as chip_cr_*
     use rule all from chip_cr as chip_cr_all
-
+    
     rule all:
         input: rules.chip_cr_all.input
 else:

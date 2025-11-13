@@ -55,7 +55,7 @@ rule computeMatrix:
             --regionBodyLength 5000 \\
             --afterRegionStartLength 3000 \\
             --skipZeros \\
-            -p {threads} {params.extra} &> {log}
+            -p {threads} {params.extra} > {log}.out 2> {log}.err
         """
 
 
@@ -77,5 +77,5 @@ rule plotHeatmap:
         pixi run plotHeatmap \\
             -m {input.matrix} \\
             -o {output.heatmap} \\
-            {params.extra} &> {log}
+            {params.extra} > {log}.out 2> {log}.err
         """

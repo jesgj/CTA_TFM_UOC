@@ -1,6 +1,10 @@
 import os
 import re
 from collections import defaultdict
+import sys
+
+sys.path.insert(0, os.path.abspath("src"))
+from utils import prepare_sample_data
 
 # --- CONFIGURATION ---
 # Define directories from config
@@ -51,9 +55,7 @@ os.makedirs(os.path.join("logs", "chipseq_cutrun", "bamCoverage"), exist_ok=True
 
 
 # --- SAMPLE DISCOVERY ---
-SAMPLES_INFO = config.get("samples_info", {})
-SAMPLES = list(SAMPLES_INFO.keys())
-config['samples_info'] = SAMPLES_INFO
+SAMPLES_INFO, SAMPLES = prepare_sample_data(config)
 
 def get_subtraction_pairs(samples_info, bigwig_dir):
     pairs = []
@@ -94,6 +96,55 @@ SUBTRACTION_PAIRS = get_subtraction_pairs(SAMPLES_INFO, BIGWIG_DIR)
 # Pass SUBTRACTION_PAIRS to config so it's accessible in included rules
 config['subtraction_pairs'] = SUBTRACTION_PAIRS
 
+
+# --- MultiQC Configuration ---
+config["pipeline_name"] = "chip_cr"
+config["multiqc_results_dir"] = "results/chipseq_cutrun"
+
+pe_samples = [s for s, i in SAMPLES_INFO.items() if i['type'] == 'PE']
+se_samples = [s for s, i in SAMPLES_INFO.items() if i['type'] == 'SE']
+
+final_outputs = []
+# Raw QC
+final_outputs.extend(expand(os.path.join(QC_DIR, "{sample}_R1_raw_fastqc.html"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(QC_DIR, "{sample}_R2_raw_fastqc.html"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(QC_DIR, "{sample}_raw_fastqc.html"), sample=se_samples))
+# Trimmed QC
+final_outputs.extend(expand(os.path.join(QC_TRIMMED_DIR, "{sample}_R1_trimmed_fastqc.html"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(QC_TRIMMED_DIR, "{sample}_R2_trimmed_fastqc.html"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(QC_TRIMMED_DIR, "{sample}_SE_trimmed_fastqc.html"), sample=se_samples))
+# Aligned BAM QC
+final_outputs.extend(expand(os.path.join(BAM_QC_DIR, "{sample}_pe.stats.txt"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(BAM_QC_DIR, "{sample}_pe.flagstat.txt"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(BAM_QC_DIR, "{sample}_pe.alignment_summary_metrics.txt"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(BAM_QC_DIR, "{sample}_se.stats.txt"), sample=se_samples))
+final_outputs.extend(expand(os.path.join(BAM_QC_DIR, "{sample}_se.flagstat.txt"), sample=se_samples))
+final_outputs.extend(expand(os.path.join(BAM_QC_DIR, "{sample}_se.alignment_summary_metrics.txt"), sample=se_samples))
+# Filtered BAMs
+final_outputs.extend(expand(os.path.join(FILTERED_BAM_DIR, "{sample}_pe.filtered.sorted.bam"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(FILTERED_BAM_DIR, "{sample}_se.filtered.sorted.bam"), sample=se_samples))
+# Filtered BAM QC
+final_outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}_pe.stats.txt"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}_pe.flagstat.txt"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}_pe.alignment_summary_metrics.txt"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}_se.stats.txt"), sample=se_samples))
+final_outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}_se.flagstat.txt"), sample=se_samples))
+final_outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}_se.alignment_summary_metrics.txt"), sample=se_samples))
+# Deeptools
+final_outputs.extend([
+    os.path.join(DEEPTOOLS_DIR, "bam_correlation_heatmap.png"),
+    os.path.join(DEEPTOOLS_DIR, "fingerprints.png"),
+    os.path.join(DEEPTOOLS_DIR, "heatmap.png"),
+])
+# Bigwigs
+final_outputs.extend(expand(os.path.join(BIGWIG_DIR, "{sample}_pe.bw"), sample=pe_samples))
+final_outputs.extend(expand(os.path.join(BIGWIG_DIR, "{sample}_se.bw"), sample=se_samples))
+# Subtracted Bigwigs
+final_outputs.extend([os.path.join(SUBTRACTED_BIGWIG_DIR, f"{pair['sample']}_{pair['read_type']}.subtracted.bw") for pair in config.get('subtraction_pairs', [])])
+
+config["multiqc_input_files"] = final_outputs
+
+
 # --- MODULE INCLUSION ---
 
 # 1. QC on raw files
@@ -105,84 +156,147 @@ include: "rules/trimming_and_qc.smk"
 # 3. Alignment
 include: "rules/chip_cr/alignment.smk"
 
-# 4. BAM QC
-include: "rules/chip_cr/bam_qc.smk"
+# 4. Generic BAM QC
+include: "rules/bam_qc.smk"
 
 # 5. Filtering and Deduplication
 include: "rules/chip_cr/filter_bam.smk"
 
-# 6. Filtered BAM QC (QC + deeptools summary)
-include: "rules/chip_cr/filtered_bam_qc.smk"
-
-# 7. BigWig generation and subtraction
+# 6. BigWig generation and subtraction
 include: "rules/chip_cr/bigwig.smk"
 
-# 8. Heatmap computeMatrix + plotHeatmap
+# 7. Heatmap computeMatrix + plotHeatmap
 include: "rules/chip_cr/heatmap.smk"
+
+# 8. MultiQC report
+include: "rules/multiqc.smk"
+
+
+# --- BAM QC INSTANTIATION ---
+
+# Aligned BAMs
+use rule samtools_stats_generic as samtools_stats_aligned with:
+    input:
+        bam = os.path.join(ALIGNMENT_DIR, "{sample}_{read_type}.sorted.bam")
+    output:
+        stats = os.path.join(BAM_QC_DIR, "{sample}_{read_type}.stats.txt")
+    log:
+        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_stats.log")
+
+use rule samtools_flagstat_generic as samtools_flagstat_aligned with:
+    input:
+        bam = os.path.join(ALIGNMENT_DIR, "{sample}_{read_type}.sorted.bam")
+    output:
+        flagstat = os.path.join(BAM_QC_DIR, "{sample}_{read_type}.flagstat.txt")
+    log:
+        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_flagstat.log")
+
+use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_aligned with:
+    input:
+        bam = os.path.join(ALIGNMENT_DIR, "{sample}_{read_type}.sorted.bam"),
+        ref = config["ref_genome"]
+    output:
+        metrics = os.path.join(BAM_QC_DIR, "{sample}_{read_type}.alignment_summary_metrics.txt")
+    log:
+        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_picard_metrics.log")
+
+# Filtered BAMs
+use rule samtools_stats_generic as samtools_stats_filtered with:
+    input:
+        bam = os.path.join(FILTERED_BAM_DIR, "{sample}_{read_type}.filtered.sorted.bam")
+    output:
+        stats = os.path.join(FILTERED_BAM_QC_DIR, "{sample}_{read_type}.stats.txt")
+    log:
+        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_filtered_stats.log")
+
+use rule samtools_flagstat_generic as samtools_flagstat_filtered with:
+    input:
+        bam = os.path.join(FILTERED_BAM_DIR, "{sample}_{read_type}.filtered.sorted.bam")
+    output:
+        flagstat = os.path.join(FILTERED_BAM_QC_DIR, "{sample}_{read_type}.flagstat.txt")
+    log:
+        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_filtered_flagstat.log")
+
+use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_filtered with:
+    input:
+        bam = os.path.join(FILTERED_BAM_DIR, "{sample}_{read_type}.filtered.sorted.bam"),
+        ref = config["ref_genome"]
+    output:
+        metrics = os.path.join(FILTERED_BAM_QC_DIR, "{sample}_{read_type}.alignment_summary_metrics.txt")
+    log:
+        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_filtered_picard_metrics.log")
+
+
+# --- DEEPTOOLS RULES (from former filtered_bam_qc.smk) ---
+
+def get_all_filtered_bams(samples_info):
+    bams = []
+    for sample, info in samples_info.items():
+        read_type = 'pe' if info['type'] == 'PE' else 'se'
+        bams.append(os.path.join(FILTERED_BAM_DIR, f"{sample}_{read_type}.filtered.sorted.bam"))
+    return bams
+
+ALL_FILTERED_BAMS = get_all_filtered_bams(SAMPLES_INFO)
+
+MBS_ARGS = config.get("deeptools", {}).get("multiBamSummary", {}).get("extra_args", "")
+PC_ARGS = config.get("deeptools", {}).get("plotCorrelation", {}).get("extra_args", "")
+PF_ARGS = config.get("deeptools", {}).get("plotFingerprint", {}).get("extra_args", "")
+
+rule multiBamSummary:
+    """
+    Computes read coverages for multiple BAM files.
+    """
+    input:
+        bams = ALL_FILTERED_BAMS
+    output:
+        npz = os.path.join(DEEPTOOLS_DIR, "read_coverage.npz")
+    params:
+        extra = MBS_ARGS
+    threads: 8
+    log:
+        os.path.join("logs", "chipseq_cutrun", "deeptools", "multiBamSummary.log")
+    shell:
+        "pixi run multiBamSummary bins -b {input.bams} -o {output.npz} -p {threads} {params.extra} > {log}.out 2> {log}.err"
+
+rule plotCorrelation:
+    """
+    Creates a heatmap of correlations based on multiBamSummary output.
+    """
+    input:
+        npz = os.path.join(DEEPTOOLS_DIR, "read_coverage.npz")
+    output:
+        heatmap = os.path.join(DEEPTOOLS_DIR, "bam_correlation_heatmap.png"),
+        matrix = os.path.join(DEEPTOOLS_DIR, "bam_correlation_matrix.tab")
+    params:
+        extra = PC_ARGS
+    threads: 1
+    log:
+        os.path.join("logs", "chipseq_cutrun", "deeptools", "plotCorrelation.log")
+    shell:
+        "pixi run plotCorrelation -in {input.npz} -o {output.heatmap} --outFileCorMatrix {output.matrix} {params.extra} > {log}.out 2> {log}.err"
+
+rule plotFingerprint:
+    """
+    Generates fingerprints for each BAM file to assess ChIP-seq quality.
+    """
+    input:
+        bams = ALL_FILTERED_BAMS
+    output:
+        plot = os.path.join(DEEPTOOLS_DIR, "fingerprints.png"),
+        metrics = os.path.join(DEEPTOOLS_DIR, "fingerprints.metrics.tab")
+    params:
+        extra = PF_ARGS
+    threads: 8
+    log:
+        os.path.join("logs", "chipseq_cutrun", "deeptools", "plotFingerprint.log")
+    shell:
+        "pixi run plotFingerprint -b {input.bams} -o {output.plot} --outRawCounts {output.metrics} -p {threads} {params.extra} > {log}.out 2> {log}.err"
 
 
 # --- FINAL TARGETS ---
-
-def get_all_final_outputs(samples_info):
-    outputs = []
-
-    # Add raw QC outputs
-    for sample, info in samples_info.items():
-        if info['type'] == 'PE':
-            outputs.append(os.path.join(QC_DIR, f"{sample}_R1_raw_fastqc.html"))
-            outputs.append(os.path.join(QC_DIR, f"{sample}_R2_raw_fastqc.html"))
-        else: # SE
-            outputs.append(os.path.join(QC_DIR, f"{sample}_raw_fastqc.html"))
-
-    # Add trimmed QC outputs
-    for sample, info in samples_info.items():
-        if info['type'] == 'PE':
-            outputs.append(os.path.join(QC_TRIMMED_DIR, f"{sample}_R1_trimmed_fastqc.html"))
-            outputs.append(os.path.join(QC_TRIMMED_DIR, f"{sample}_R2_trimmed_fastqc.html"))
-        else: # SE
-            outputs.append(os.path.join(QC_TRIMMED_DIR, f"{sample}_SE_trimmed_fastqc.html"))
-
-    # Add BAM QC outputs
-    for sample, info in samples_info.items():
-        read_type = 'pe' if info['type'] == 'PE' else 'se'
-        outputs.extend([
-            os.path.join(BAM_QC_DIR, f"{sample}_{read_type}.stats.txt"),
-            os.path.join(BAM_QC_DIR, f"{sample}_{read_type}.flagstat.txt"),
-            os.path.join(BAM_QC_DIR, f"{sample}_{read_type}.alignment_summary_metrics.txt")
-        ])
-
-    # Add filtered BAM files
-    for sample, info in samples_info.items():
-        read_type = 'pe' if info['type'] == 'PE' else 'se'
-        outputs.append(os.path.join(FILTERED_BAM_DIR, f"{sample}_{read_type}.filtered.sorted.bam"))
-
-    # Add filtered BAM QC outputs
-    for sample, info in samples_info.items():
-        read_type = 'pe' if info['type'] == 'PE' else 'se'
-        outputs.extend([
-            os.path.join(FILTERED_BAM_QC_DIR, f"{sample}_{read_type}.stats.txt"),
-            os.path.join(FILTERED_BAM_QC_DIR, f"{sample}_{read_type}.flagstat.txt"),
-            os.path.join(FILTERED_BAM_QC_DIR, f"{sample}_{read_type}.alignment_summary_metrics.txt")
-        ])
-
-    # Add deeptools outputs
-    outputs.extend([
-        os.path.join(DEEPTOOLS_DIR, "bam_correlation_heatmap.png"),
-        os.path.join(DEEPTOOLS_DIR, "fingerprints.png"),
-        os.path.join(DEEPTOOLS_DIR, "heatmap.png")
-    ])
-
-    # Add bigwig outputs
-    for sample, info in samples_info.items():
-        read_type = 'pe' if info['type'] == 'PE' else 'se'
-        outputs.append(os.path.join(BIGWIG_DIR, f"{sample}_{read_type}.bw"))
-
-    # Add subtracted bigwig outputs
-    for pair in config['subtraction_pairs']:
-        outputs.append(os.path.join(SUBTRACTED_BIGWIG_DIR, f"{pair['sample']}_{pair['read_type']}.subtracted.bw"))
-
-    return outputs
-
+#print("Final outputs:", final_outputs)
 rule all:
     input:
-        get_all_final_outputs(SAMPLES_INFO)
+        final_outputs,
+        os.path.join(config["multiqc_results_dir"], "multiqc_report.html")
+    default_target: True

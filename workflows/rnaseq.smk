@@ -2,6 +2,10 @@
 import os
 import re
 from collections import defaultdict
+import sys
+
+sys.path.insert(0, os.path.abspath("src"))
+from utils import prepare_sample_data
 
 # --- CONFIGURATION ---
 RAW_DIR = config["raw_fastqs_dir"]
@@ -45,9 +49,24 @@ os.makedirs(os.path.join("logs", "hisat2_build"), exist_ok=True)
 
 
 # --- SAMPLE DISCOVERY ---
-SAMPLES_INFO = config.get("samples_info", {})
-SAMPLES = list(SAMPLES_INFO.keys())
-config['samples_info'] = SAMPLES_INFO
+SAMPLES_INFO, SAMPLES = prepare_sample_data(config)
+
+
+# --- HELPER FUNCTION FOR OUTPUTS ---
+def get_rnaseq_outputs(samples):
+    outputs = []
+    outputs.extend(expand(os.path.join(QC_DIR, "{sample}_R1_raw_fastqc.html"), sample=samples))
+    outputs.extend(expand(os.path.join(QC_DIR, "{sample}_R2_raw_fastqc.html"), sample=samples))
+    outputs.extend(expand(os.path.join(QC_TRIMMED_DIR, "{sample}_R1_trimmed_fastqc.html"), sample=samples))
+    outputs.extend(expand(os.path.join(QC_TRIMMED_DIR, "{sample}_R2_trimmed_fastqc.html"), sample=samples))
+    outputs.extend(expand(os.path.join(KALLISTO_OUTPUT_DIR, "{sample}", "abundance.tsv"), sample=samples))
+    outputs.extend(expand(os.path.join(ALIGNMENT_DIR, "{sample}_pe.sorted.bam"), sample=samples))
+    return outputs
+
+# --- MultiQC Configuration ---
+config["pipeline_name"] = "rnaseq"
+config["multiqc_results_dir"] = "results/rnaseq"
+config["multiqc_input_files"] = get_rnaseq_outputs(SAMPLES)
 
 
 # --- MODULE INCLUSION ---
@@ -64,6 +83,9 @@ include: "rules/rnaseq/pseudoalignment.smk"
 # 4. Alignment
 include: "rules/rnaseq/alignment.smk"
 
+# 5. MultiQC report
+include: "rules/multiqc.smk"
+
 
 # --- FINAL TARGETS ---
 
@@ -78,4 +100,6 @@ rule all:
         # Kallisto quantification files
         expand(os.path.join(KALLISTO_OUTPUT_DIR, "{sample}", "abundance.tsv"), sample=SAMPLES),
         # HISAT2 alignment files
-        expand(os.path.join(ALIGNMENT_DIR, "{sample}_pe.sorted.bam"), sample=SAMPLES)
+        expand(os.path.join(ALIGNMENT_DIR, "{sample}_pe.sorted.bam"), sample=SAMPLES),
+        # MultiQC report
+        os.path.join(config["multiqc_results_dir"], "multiqc_report.html")

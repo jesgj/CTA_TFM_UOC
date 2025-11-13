@@ -32,7 +32,7 @@ rule fastp_trim:
         -o {output.trimmed_r1} -O {output.trimmed_r2} \
         -h {output.html} -j {output.json} \
         {params.extra} \
-        -t {threads} &> {log}
+        -t {threads} > {log}.out 2> {log}.err
         """
 
 rule fastp_trim_se:
@@ -58,7 +58,7 @@ rule fastp_trim_se:
         -o {output.trimmed_r1} \
         -h {output.html} -j {output.json} \
         {params.extra} \
-        -t {threads} &> {log}
+        -t {threads} > {log}.out 2> {log}.err
         """
 
 # --- QC on Trimmed ---
@@ -82,7 +82,7 @@ rule fastqc_trimmed:
         os.path.join("logs", config["pipeline"], "fastqc_trimmed", "{sample}_pe.log")
     shell:
         """
-        pixi run fastqc -o {params.outdir} -t {threads} {input.r1} {input.r2} &> {log}
+        pixi run fastqc -o {params.outdir} -t {threads} {input.r1} {input.r2} > {log}.out 2> {log}.err
         mv {params.outdir}/{wildcards.sample}_R1.fastqc.html {output.html_r1}
         mv {params.outdir}/{wildcards.sample}_R2.fastqc.html {output.html_r2}
         mv {params.outdir}/{wildcards.sample}_R1.fastqc.zip {output.zip_r1}
@@ -108,7 +108,7 @@ rule fastqc_trimmed_se:
         os.path.join("logs", config["pipeline"], "fastqc_trimmed", "{sample}_se.log")
     shell:
         """
-        pixi run fastqc -o {params.outdir} -t {threads} {input.r1} &> {log}
+        pixi run fastqc -o {params.outdir} -t {threads} {input.r1} > {log}.out 2> {log}.err
         mv {params.outdir}/{wildcards.sample}_SE.fastqc.html {output.html}
         mv {params.outdir}/{wildcards.sample}_SE.fastqc.zip {output.zip}
         """

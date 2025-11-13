@@ -1,4 +1,4 @@
-pipeline: "chip_cr"  # Change to "rnaseq" to change the pipeline
+pipeline: "wgbs"  # Change to "rnaseq" to change the pipeline
 
 rnaseq:
   raw_fastqs_dir: "data/rnaseq_raw_fastqs"

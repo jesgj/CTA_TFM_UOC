@@ -32,7 +32,7 @@ rule methyldackel_extract_methylkit:
     shell:
         """
         options=$(cat {input.options})
-        pixi run MethylDackel extract --methylKit ${{options}} {params.extra_opts} {params.extra} -o {params.output_prefix} {input.ref} {input.bam} &> {log}
+        pixi run MethylDackel extract --methylKit ${{options}} {params.extra_opts} {params.extra} -o {params.output_prefix} {input.ref} {input.bam} > {log}.out 2> {log}.err
         """
 
 rule methyldackel_extract_mergecontext:
@@ -55,5 +55,5 @@ rule methyldackel_extract_mergecontext:
     shell:
         """
         options=$(cat {input.options})
-        pixi run MethylDackel extract --mergeContext ${{options}} {params.extra_opts} {params.extra} -o {params.output_prefix} {input.ref} {input.bam} &> {log}
+        pixi run MethylDackel extract --mergeContext ${{options}} {params.extra_opts} {params.extra} -o {params.output_prefix} {input.ref} {input.bam} > {log}.out 2> {log}.err
         """

@@ -33,7 +33,7 @@ rule bamCoverage:
 pixi run bamCoverage -b {input.bam} -o {output.bigwig} \
             --normalizeUsing {params.normalize} \
             {params.extra} \
-            -p {threads} &> {log}
+            -p {threads} > {log}.out 2> {log}.err
         """
 
 
@@ -74,6 +74,6 @@ pixi run bigwigCompare \
             -b2 {input.input_bw} \
             -o {output.subtracted_bw} \
             --operation {params.method} \
-            {params.extra} &> {log}
+            {params.extra} > {log}.out 2> {log}.err
         """
 

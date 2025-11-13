@@ -22,7 +22,7 @@ rule kallisto_index:
     log:
         os.path.join("logs", "kallisto_index.log")
     shell:
-        "pixi run kallisto index -i {output.index} {input.fasta} &> {log}"
+        "pixi run kallisto index -i {output.index} {input.fasta} > {log}.out 2> {log}.err"
 
 rule kallisto_quant:
     """
@@ -44,5 +44,5 @@ rule kallisto_quant:
     shell:
         """
         pixi run kallisto quant -i {input.index} -o {params.output_dir} \
-        -t {threads} {params.extra} {input.r1} {input.r2} &> {log}
+        -t {threads} {params.extra} {input.r1} {input.r2} > {log}.out 2> {log}.err
         """

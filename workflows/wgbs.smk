@@ -1,6 +1,10 @@
 # WGBS module workflow
 import os
 import re
+import sys
+
+sys.path.insert(0, os.path.abspath("src"))
+from utils import prepare_sample_data
 
 # --- CONFIGURATION ---
 # Define directories from config
@@ -50,9 +54,31 @@ os.makedirs(METHYLDACKEL_DIR, exist_ok=True)
 os.makedirs(METHYLDACKEL_MERGECONTEXT_DIR, exist_ok=True)
 
 # --- SAMPLE DISCOVERY ---
-SAMPLES_INFO = config.get("samples_info", {})
-SAMPLES = list(SAMPLES_INFO.keys())
-config['samples_info'] = SAMPLES_INFO
+SAMPLES_INFO, SAMPLES = prepare_sample_data(config)
+
+
+# --- HELPER FUNCTION FOR OUTPUTS ---
+def get_wgbs_outputs(samples):
+    outputs = []
+    outputs.extend([os.path.join(QC_DIR, f"{sample}_{read}_raw_fastqc.html") for sample in samples for read in ["R1", "R2"]])
+    outputs.extend([os.path.join(QC_TRIMMED_DIR, f"{sample}_{read}_trimmed_fastqc.html") for sample in samples for read in ["R1", "R2"]])
+    outputs.extend(expand(os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"), sample=samples))
+    outputs.extend(expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.stats.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.flagstat.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.alignment_summary_metrics.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.stats.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.flagstat.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.alignment_summary_metrics.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(MBIAS_DIR, "{sample}.options.txt"), sample=samples))
+    outputs.append(os.path.join(MBIAS_DIR, "all_samples_mbias_options.tsv"))
+    outputs.extend(expand(os.path.join(METHYLDACKEL_DIR, "{sample}_methylKit.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}.bedGraph"), sample=samples))
+    return outputs
+
+# --- MultiQC Configuration ---
+config["pipeline_name"] = "wgbs"
+config["multiqc_results_dir"] = "results/wgbs"
+config["multiqc_input_files"] = get_wgbs_outputs(SAMPLES)
 
 
 # --- MODULE INCLUSION ---
@@ -66,20 +92,75 @@ include: "rules/trimming_and_qc.smk"
 # 3. Alignment
 include: "rules/wgbs/alignment.smk"
 
-# 4. QC on Deduplicated BAMs
-include: "rules/wgbs/bam_qc.smk"
+# 4. Generic BAM QC
+include: "rules/bam_qc.smk"
 
 # 5. Filtering and Sorting of BAMs
 include: "rules/wgbs/filter_bam.smk"
 
-# 6. QC on Filtered BAMs
-include: "rules/wgbs/filtered_bam_qc.smk"
-
-# 7. Methylation Bias
+# 6. Methylation Bias
 include: "rules/wgbs/mbias.smk"
 
-# 8. Methylation Extraction
+# 7. Methylation Extraction
 include: "rules/wgbs/methyldackel.smk"
+
+# 8. MultiQC report
+include: "rules/multiqc.smk"
+
+
+# --- BAM QC INSTANTIATION ---
+
+# Deduplicated BAMs
+use rule samtools_stats_generic as samtools_stats_dedup with:
+    input:
+        bam = os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam")
+    output:
+        stats = os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.stats.txt")
+    log:
+        os.path.join("logs", "samtools_stats_dedup", "{sample}.log")
+
+use rule samtools_flagstat_generic as samtools_flagstat_dedup with:
+    input:
+        bam = os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam")
+    output:
+        flagstat = os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.flagstat.txt")
+    log:
+        os.path.join("logs", "samtools_flagstat_dedup", "{sample}.log")
+
+use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_dedup with:
+    input:
+        bam = os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"),
+        ref = config["ref_genome"]
+    output:
+        metrics = os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.alignment_summary_metrics.txt")
+    log:
+        os.path.join("logs", "picard_collect_alignment_metrics_dedup", "{sample}.log")
+
+# Filtered BAMs
+use rule samtools_stats_generic as samtools_stats_filtered with:
+    input:
+        bam = os.path.join(SORTED_FILTERED_BAM_DIR, "{sample}_pe.filtered.sorted.bam")
+    output:
+        stats = os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.stats.txt")
+    log:
+        os.path.join("logs", "samtools_stats_filtered", "{sample}.log")
+
+use rule samtools_flagstat_generic as samtools_flagstat_filtered with:
+    input:
+        bam = os.path.join(SORTED_FILTERED_BAM_DIR, "{sample}_pe.filtered.sorted.bam")
+    output:
+        flagstat = os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.flagstat.txt")
+    log:
+        os.path.join("logs", "samtools_flagstat_filtered", "{sample}.log")
+
+use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_filtered with:
+    input:
+        bam = os.path.join(SORTED_FILTERED_BAM_DIR, "{sample}_pe.filtered.sorted.bam"),
+        ref = config["ref_genome"]
+    output:
+        metrics = os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.alignment_summary_metrics.txt")
+    log:
+        os.path.join("logs", "picard_collect_alignment_metrics_filtered", "{sample}.log")
 
 
 # --- FINAL TARGETS ---
@@ -97,10 +178,14 @@ rule all:
         expand(os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"), sample=SAMPLES),
 
         # 4. QC reports for deduplicated BAMs
-        rules.all_dedup_bam_qc.input,
+        expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.stats.txt"), sample=SAMPLES),
+        expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.flagstat.txt"), sample=SAMPLES),
+        expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.alignment_summary_metrics.txt"), sample=SAMPLES),
 
         # 5. QC reports for filtered BAMs
-        rules.all_filtered_bam_qc.input,
+        expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.stats.txt"), sample=SAMPLES),
+        expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.flagstat.txt"), sample=SAMPLES),
+        expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.alignment_summary_metrics.txt"), sample=SAMPLES),
 
         # 6. Mbias reports
         expand(os.path.join(MBIAS_DIR, "{sample}.options.txt"), sample=SAMPLES),
@@ -108,4 +193,8 @@ rule all:
 
         # 7. Methylation extraction reports
         expand(os.path.join(METHYLDACKEL_DIR, "{sample}_methylKit.txt"), sample=SAMPLES),
-        expand(os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}.bedGraph"), sample=SAMPLES)
+        expand(os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}.bedGraph"), sample=SAMPLES),
+        
+        # MultiQC report
+        os.path.join(config["multiqc_results_dir"], "multiqc_report.html")
+    default_target: True
