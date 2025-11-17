@@ -43,7 +43,7 @@ rule picard_collect_alignment_metrics_generic:
     output:
         metrics = "path/to/output.metrics.txt"
     params:
-        java_opts = "-Xmx4g" # This can be overridden if needed
+        java_opts=config.get("picard", {}).get("java_opts", "-Xmx4g")
     log:
         "logs/picard_metrics.log"
     shell:

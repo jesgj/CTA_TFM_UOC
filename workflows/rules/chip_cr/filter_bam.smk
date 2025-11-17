@@ -34,7 +34,7 @@ rule sambamba_filter_dedup_sort:
     shell:
         """
         pixi run bash -c "
-          sambamba markdup -t {threads} -r {params.markdup_extra} {input.bam} /dev/stdout |
+          sambamba markdup -t {threads} {params.markdup_extra} {input.bam} /dev/stdout |
           sambamba view -t {threads} -f bam -F '{params.view_extra}' /dev/stdin |
           sambamba sort -t {threads} -o {output.filtered_sorted_bam} /dev/stdin
         " 2> {log}

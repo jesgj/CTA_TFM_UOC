@@ -60,6 +60,9 @@ wgbs:
     extra_args: ""
   methyldackel_extract:
     extra_args: ""
+    extra_opts: "--minOppositeDepth 10 --maxVariantFrac 0.5"
+  picard:
+    java_opts: "-Xmx4g"
 
 chip_cr:
   raw_fastqs_dir: "data/chip_seq_raw_fastqs"
@@ -113,11 +116,17 @@ chip_cr:
   bowtie2:
     extra_args: ""
   sambamba:
-    markdup_extra_args: ""
+    markdup_extra_args: "-r"
     view_extra_args: "not unmapped"
   deeptools:
     multiBamSummary:
       extra_args: "--binSize 10000"
+    computeMatrix:
+      extra_args: ""
+      beforeRegionStartLength: 3000
+      regionBodyLength: 5000
+      afterRegionStartLength: 3000
+      skipZeros: True
     plotCorrelation:
       extra_args: "--corMethod spearman --skipZeros"
     plotFingerprint:
@@ -128,3 +137,5 @@ chip_cr:
     bigwigCompare:
       method: "subtract"
       extra_args: ""
+  picard:
+    java_opts: "-Xmx4g"

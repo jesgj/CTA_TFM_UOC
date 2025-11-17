@@ -9,63 +9,76 @@ The project currently supports three main pipelines:
 
 ---
 
-### **Project Review and Report**
+## Project Overview
 
-This report provides a comprehensive analysis of the Snakemake-based bioinformatics pipeline project. The review covers its architecture, dependency management, individual pipeline workflows, and key features.
+This project is a highly modular and reproducible bioinformatics pipeline for analyzing Next-Generation Sequencing (NGS) data. It is built using the [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow management system and utilizes [Pixi](https://pixi.sh/) for dependency and environment management.
 
-#### **1. Overall Architecture**
+The primary goal of this project is to provide a flexible framework for running different types of NGS analysis by simply changing a configuration setting. It currently supports three distinct pipelines:
 
-The project is built around a highly modular and scalable architecture, leveraging modern Snakemake features to manage three distinct bioinformatics workflows.
+*   **ChIP-seq / CUT&RUN (`chip_cr`)**: For analyzing protein-DNA interactions.
+*   **Whole-Genome Bisulfite Sequencing (`wgbs`)**: For analyzing DNA methylation.
+*   **RNA-seq (`rnaseq`)**: For transcriptomics and gene expression analysis.
 
-- **Main `Snakefile`**: Acts as a clean and simple entry point. It uses Snakemake's `module` system to import the selected workflow based on a `pipeline` setting in the configuration file. This is an excellent design choice that keeps the main file uncluttered and delegates complexity to the appropriate modules.
-- **Configuration (`config/config.yaml`)**: A centralized configuration file provides a single source of truth for all parameters. It is well-organized, with separate sections for each pipeline and its tools. This allows users to adapt the pipeline to different datasets and environments without modifying the source code.
-- **Workflow Definitions (`workflows/*.smk`)**: Each pipeline has a master snakefile that defines its overall structure. This file is responsible for discovering input samples, creating directories, including the necessary rule files, and defining the final set of output files.
-- **Rule Definitions (`workflows/rules/**/*.smk`)**: The core logic is encapsulated in modular rule files, organized by pipeline and function (e.g., `alignment.smk`, `qc.smk`). This separation of concerns makes the pipeline easy to understand, maintain, and extend.
+### Key Features
 
-#### **2. Dependency and Environment Management**
+*   **Modularity**: The pipeline is architected around a main `Snakefile` that acts as a controller, dynamically loading the selected workflow (`chip_cr`, `wgbs`, or `rnaseq`) from the `workflows/` directory.
+*   **Configuration-driven**: All aspects of the pipeline, from sample definitions to tool-specific parameters, are controlled through a central configuration file, `config/config.yaml`.
+*   **Reproducibility**: The project uses `pixi.toml` to define and lock the versions of all bioinformatics tools and software dependencies. This ensures that the analysis can be reproduced consistently across different environments.
+*   **Automated Sample Discovery**: The pipeline can automatically discover input FASTQ files from a directory (as defined in `config.yaml`) or use a manually specified sample sheet. This is handled by helper functions in `src/utils.py`.
+*   **Unified QC**: A centralized set of rules for quality control (`fastqc`) and adapter trimming (`fastp`) are shared across all pipelines, ensuring consistent data preprocessing.
+*   **Comprehensive Reporting**: Each pipeline culminates in a [MultiQC](https://multiqc.info/) report, which aggregates results from all analysis steps into a single, interactive HTML file.
 
-The project utilizes **Pixi** for dependency management, as defined in `pixi.toml`. This is a major strength.
+## Building and Running the Pipeline
 
-- **Reproducibility**: By locking software versions (e.g., `fastqc`, `bowtie2`, `samtools`), Pixi ensures that the pipeline can be run in a consistent and reproducible software environment across different machines.
-- **Isolation**: All tool commands are executed via `pixi run`, which guarantees that the correct tool versions are used, avoiding conflicts with system-wide installations.
+The pipeline is executed using the `snakemake` command, which should be run within the Pixi environment to ensure all dependencies are available.
 
-#### **3. Pipeline Analysis**
+### 1. Setup
 
-The project successfully implements three distinct, production-quality pipelines.
+The project dependencies are managed by Pixi. To install them, you would typically run:
 
-**a) ChIP-seq/CUT&RUN (`chip_cr`)**
-This is a complete workflow for analyzing protein-DNA binding data.
-- **Steps**: Raw QC (`fastqc`), adapter trimming (`fastp`), alignment (`bowtie2`), BAM QC (`samtools`, `picard`), filtering and duplicate marking (`sambamba`), and extensive downstream analysis with `deeptools` (correlation heatmaps, fingerprint plots, signal tracks).
-- **Features**: It correctly handles both paired-end and single-end data, and includes a clever mechanism for identifying control/input samples to perform signal subtraction (`bigwigCompare`), which is crucial for generating clean signal tracks.
+```bash
+pixi install
+```
 
-**b) Whole-Genome Bisulfite Sequencing (`wgbs`)**
-This is a robust pipeline for DNA methylation analysis.
-- **Steps**: It follows best practices, starting with genome preparation and alignment using `bismark`, followed by deduplication. It includes multiple rounds of QC (`samtools`, `picard`) before and after filtering (`sambamba`).
-- **Features**: A key strength is the inclusion of methylation bias analysis (`MethylDackel mbias`) before the final methylation extraction (`MethylDackel extract`). It also correctly generates output formats for multiple downstream R packages (`methylKit`, `DSS`), adding to its flexibility.
+### 2. Configuration
 
-**c) RNA-seq (`rnaseq`)**
-This pipeline is designed for transcriptomic analysis and offers a powerful dual-path approach.
-- **Path 1 (Pseudo-alignment)**: Uses `kallisto` for rapid, alignment-free transcript quantification. This is ideal for gene expression studies.
-- **Path 2 (Alignment)**: Uses `hisat2` to perform a traditional genome alignment, producing sorted BAM files. This is essential for more complex analyses like splice variant detection or visualization in a genome browser.
-- **Features**: The flexibility to choose between these two methods within the same framework makes the `rnaseq` branch highly versatile.
+1.  **Select the pipeline**: Open `config/config.yaml` and set the `pipeline` variable to the desired workflow: `"chip_cr"`, `"wgbs"`, or `"rnaseq"`.
+2.  **Configure paths and samples**:
+    *   Update the `raw_fastqs_dir` to point to your input data.
+    *   Either provide a `samples_info` block with a list of your samples and their FASTQ files or leave it empty to let the pipeline auto-discover samples from the `raw_fastqs_dir`.
+    *   Adjust any other pipeline-specific parameters as needed (e.g., reference genome path, tool arguments).
 
-#### **4. Key Strengths**
+### 3. Execution
 
-1.  **Excellent Modularity**: The clear separation between configuration, workflow orchestration, and rule logic is best-in-class. The project effectively uses Snakemake's module system to create independent, reusable components.
-2.  **High Configurability**: Users can easily control nearly every aspect of the pipeline—from file paths to specific tool arguments—through the central `config.yaml`, minimizing the need to edit the source code.
-3.  **Guaranteed Reproducibility**: The use of Pixi for managing the complex web of bioinformatics tools is a critical feature that ensures scientific reproducibility across different systems.
-4.  **Unified QC and Trimming**: The pipeline uses a centralized set of rules for initial quality control (`fastqc`) and adapter/quality trimming (`fastp`). These rules are shared across all workflows, reducing code duplication and ensuring consistent processing of raw data.
-5.  **Abstracted Sample Discovery**: Sample detection is handled by a single utility function that can either parse a directory of FASTQ files or read sample information from the configuration file. This logic is reused by all pipelines, simplifying workflow setup.
-6.  **Centralized Reporting with MultiQC**: Each workflow culminates in a comprehensive MultiQC report, which aggregates QC metrics from all tools and steps into a single, interactive HTML file. This provides a holistic view of the entire analysis.
-7.  **Robust and Consistent Logging**: All rules have been configured to produce consistent log files, separating standard output and standard error streams (`.out` and `.err`). This greatly simplifies debugging and troubleshooting.
-8.  **Adherence to Best Practices**: The pipelines incorporate essential steps often overlooked, such as multi-stage QC, duplicate removal, and methylation bias assessment, ensuring high-quality, reliable results.
+To run the pipeline, use the `snakemake` command. It is recommended to run it through Pixi to ensure the correct environment is used.
 
-#### **5. Suggestions for Improvement**
+**Example commands:**
 
-1.  **Consolidate BAM QC Rules**: The quality control steps performed on BAM files (e.g., `samtools stats`, `picard CollectAlignmentSummaryMetrics`) are currently defined separately within the `chip_cr` and `wgbs` workflows. These could be refactored into a single, generic `bam_qc.smk` module that can be included by any workflow. This would further reduce code duplication and centralize the logic for BAM file validation.
-2.  **Parameterize Rule-Specific Arguments**: Some tool-specific arguments are currently defined within the rule's `shell` block (e.g., memory options for Picard, or filtering criteria for `MethylDackel`). Moving these parameters to the `config.yaml` file would increase flexibility and make it easier for users to tune the pipeline for specific datasets without editing the rule files.
+*   **Dry-run (to see what tasks will be executed):**
 
----
-**Conclusion:**
+    ```bash
+    pixi run snakemake -- -n
+    ```
 
-This is an exceptionally well-designed and robust bioinformatics pipeline project. Its modularity, configurability, and focus on reproducibility set a high standard. The implemented workflows are comprehensive and adhere to current best practices in the field. By addressing the minor points of code duplication and parameterization, this project could serve as an even more flexible and exemplary framework for bioinformatics analysis.
+*   **Execute the pipeline locally (using 8 cores):**
+
+    ```bash
+    pixi run snakemake -- -c8
+    ```
+
+*   **Generate a DAG (Directed Acyclic Graph) of the workflow:**
+
+    ```bash
+    pixi run snakemake --dag | dot -Tpng > dag.png
+    ```
+
+## Development Conventions
+
+*   **Workflow Structure**: Each main pipeline (e.g., `chip_cr`) has a master snakefile in `workflows/` (e.g., `workflows/chip_cr.smk`). This file is responsible for loading configuration, discovering samples, and including the necessary rule files.
+*   **Modular Rules**: The actual pipeline logic is encapsulated in modular rule files located in `workflows/rules/`.
+    *   Generic rules that can be shared across pipelines (e.g., `qc.smk`, `multiqc.smk`) are in the top-level `rules/` directory.
+    *   Pipeline-specific rules are organized into subdirectories (e.g., `workflows/rules/chip_cr/`).
+*   **Configuration**: All configurable parameters should be in `config/config.yaml`. The Snakefile rules should read their parameters from the `config` object.
+*   **Scripts**: Custom helper scripts and utility functions are placed in the `src/` directory.
+*   **Logging**: All rules are configured to write `stdout` and `stderr` to log files in the `logs/` directory, with a subdirectory for each pipeline and rule.
+*   **Dependency Management**: All tool commands within the `shell` block of a rule should be prefixed with `pixi run` to ensure the use of the correct, version-locked tool.

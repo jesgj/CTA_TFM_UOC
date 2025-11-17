@@ -41,7 +41,11 @@ rule computeMatrix:
     output:
         matrix = os.path.join(DEEPTOOLS_DIR, "matrix.gz")
     params:
-        extra = config.get("deeptools", {}).get("computeMatrix", {}).get("extra_args", "")
+        extra = config.get("deeptools", {}).get("computeMatrix", {}).get("extra_args", ""),
+        before_start_len=config.get("deeptools", {}).get("computeMatrix", {}).get("beforeRegionStartLength", 3000),
+        region_body_len=config.get("deeptools", {}).get("computeMatrix", {}).get("regionBodyLength", 5000),
+        after_start_len=config.get("deeptools", {}).get("computeMatrix", {}).get("afterRegionStartLength", 3000),
+        skip_zeros="--skipZeros" if config.get("deeptools", {}).get("computeMatrix", {}).get("skipZeros", True) else ""
     threads: 8
     log:
         os.path.join("logs", "chipseq_cutrun", "deeptools", "computeMatrix.log")
@@ -51,10 +55,10 @@ rule computeMatrix:
             -S {input.bws} \\
             -R {input.bed} \\
             -o {output.matrix} \\
-            --beforeRegionStartLength 3000 \\
-            --regionBodyLength 5000 \\
-            --afterRegionStartLength 3000 \\
-            --skipZeros \\
+            --beforeRegionStartLength {params.before_start_len} \\
+            --regionBodyLength {params.region_body_len} \\
+            --afterRegionStartLength {params.after_start_len} \\
+            {params.skip_zeros} \\
             -p {threads} {params.extra} > {log}.out 2> {log}.err
         """
 

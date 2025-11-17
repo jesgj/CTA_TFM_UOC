@@ -24,7 +24,7 @@ rule methyldackel_extract_methylkit:
         methylkit_file=os.path.join(METHYLDACKEL_DIR, "{sample}_methylKit.txt")
     params:
         output_prefix=os.path.join(METHYLDACKEL_DIR, "{sample}"),
-        extra_opts="--minOppositeDepth 10 --maxVariantFrac 0.5",
+        extra_opts=config.get("methyldackel_extract", {}).get("extra_opts", "--minOppositeDepth 10 --maxVariantFrac 0.5"),
         extra=METHYLDACKEL_EXTRACT_EXTRA_ARGS
     threads: 1
     log:
@@ -47,7 +47,7 @@ rule methyldackel_extract_mergecontext:
         bedgraph=os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}.bedGraph")
     params:
         output_prefix=lambda wildcards: os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, wildcards.sample),
-        extra_opts="--minOppositeDepth 10 --maxVariantFrac 0.5",
+        extra_opts=config.get("methyldackel_extract", {}).get("extra_opts", "--minOppositeDepth 10 --maxVariantFrac 0.5"),
         extra=METHYLDACKEL_EXTRACT_EXTRA_ARGS
     threads: 1
     log:
