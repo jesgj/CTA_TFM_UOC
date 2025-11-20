@@ -83,10 +83,20 @@ rule fastqc_trimmed:
     shell:
         """
         pixi run fastqc -o {params.outdir} -t {threads} {input.r1} {input.r2} > {log}.out 2> {log}.err
-        mv {params.outdir}/{wildcards.sample}_R1.fastqc.html {output.html_r1}
-        mv {params.outdir}/{wildcards.sample}_R2.fastqc.html {output.html_r2}
-        mv {params.outdir}/{wildcards.sample}_R1.fastqc.zip {output.zip_r1}
-        mv {params.outdir}/{wildcards.sample}_R2.fastqc.zip {output.zip_r2}
+        
+        # --- Rename logic for R1 ---
+        R1_BASE=$(basename {input.r1})
+        R1_STEM=${{R1_BASE%%.fq.gz}}
+        
+        mv {params.outdir}/${{R1_STEM}}_fastqc.html {output.html_r1}
+        mv {params.outdir}/${{R1_STEM}}_fastqc.zip {output.zip_r1}
+
+        # --- Rename logic for R2 ---
+        R2_BASE=$(basename {input.r2})
+        R2_STEM=${{R2_BASE%%.fq.gz}}
+
+        mv {params.outdir}/${{R2_STEM}}_fastqc.html {output.html_r2}
+        mv {params.outdir}/${{R2_STEM}}_fastqc.zip {output.zip_r2}
         """
 
 
@@ -109,6 +119,11 @@ rule fastqc_trimmed_se:
     shell:
         """
         pixi run fastqc -o {params.outdir} -t {threads} {input.r1} > {log}.out 2> {log}.err
-        mv {params.outdir}/{wildcards.sample}_SE.fastqc.html {output.html}
-        mv {params.outdir}/{wildcards.sample}_SE.fastqc.zip {output.zip}
+        
+        # --- Rename logic ---
+        R1_BASE=$(basename {input.r1})
+        R1_STEM=${{R1_BASE%%.fq.gz}}
+        
+        mv {params.outdir}/${{R1_STEM}}_fastqc.html {output.html}
+        mv {params.outdir}/${{R1_STEM}}_fastqc.zip {output.zip}
         """

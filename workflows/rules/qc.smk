@@ -24,11 +24,27 @@ rule fastqc_raw_pe:
         os.path.join("logs", config["pipeline"], "fastqc_raw", "{sample}_pe.log")
     shell:
         """
+        # 1. Run FastQC
         pixi run fastqc -o {params.outdir} -t {threads} {input.r1} {input.r2} > {log}.out 2> {log}.err
-        mv {params.outdir}/{wildcards.sample}_R1.fastqc.html {output.html_r1}
-        mv {params.outdir}/{wildcards.sample}_R2.fastqc.html {output.html_r2}
-        mv {params.outdir}/{wildcards.sample}_R1.fastqc.zip {output.zip_r1}
-        mv {params.outdir}/{wildcards.sample}_R2.fastqc.zip {output.zip_r2}
+
+        # --- Rename logic for R1 ---
+        # Get base filename
+        R1_BASE=$(basename {input.r1})
+        # Remove .fastq.gz or .fq.gz to get the 'stem'
+        R1_STEM=${{R1_BASE%%.fastq.gz}}
+        R1_STEM=${{R1_STEM%%.fq.gz}}
+        
+        # Move using the real name that FastQC generated
+        mv {params.outdir}/${{R1_STEM}}_fastqc.html {output.html_r1}
+        mv {params.outdir}/${{R1_STEM}}_fastqc.zip {output.zip_r1}
+
+        # --- Rename logic for R2 ---
+        R2_BASE=$(basename {input.r2})
+        R2_STEM=${{R2_BASE%%.fastq.gz}}
+        R2_STEM=${{R2_STEM%%.fq.gz}}
+
+        mv {params.outdir}/${{R2_STEM}}_fastqc.html {output.html_r2}
+        mv {params.outdir}/${{R2_STEM}}_fastqc.zip {output.zip_r2}
         """
 
 rule fastqc_raw_se:
@@ -49,7 +65,17 @@ rule fastqc_raw_se:
         os.path.join("logs", config["pipeline"], "fastqc_raw", "{sample}_se.log")
     shell:
         """
+        # 1. Run FastQC
         pixi run fastqc -o {params.outdir} -t {threads} {input.r1} > {log}.out 2> {log}.err
-        mv {params.outdir}/{wildcards.sample}.fastqc.html {output.html}
-        mv {params.outdir}/{wildcards.sample}.fastqc.zip {output.zip}
+
+        # --- Rename logic ---
+        # Get base filename
+        R1_BASE=$(basename {input.r1})
+        # Remove .fastq.gz or .fq.gz to get the 'stem'
+        R1_STEM=${{R1_BASE%%.fastq.gz}}
+        R1_STEM=${{R1_STEM%%.fq.gz}}
+        
+        # Move using the real name that FastQC generated
+        mv {params.outdir}/${{R1_STEM}}_fastqc.html {output.html}
+        mv {params.outdir}/${{R1_STEM}}_fastqc.zip {output.zip}
         """
