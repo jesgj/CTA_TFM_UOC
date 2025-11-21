@@ -19,9 +19,7 @@ rule methyldackel_mbias:
         bam=os.path.join(SORTED_FILTERED_BAM_DIR, "{sample}_pe.filtered.sorted.bam"),
         ref=REF_GENOME
     output:
-        mbias_txt=os.path.join(MBIAS_DIR, "{sample}_mbias.txt"),
-        mbias_png=os.path.join(MBIAS_DIR, "{sample}_mbias.png"),
-        mbias_r=os.path.join(MBIAS_DIR, "{sample}_mbias.R"),
+        mbias_txt=os.path.join(MBIAS_DIR, "{sample}.mbias.txt"),
         options=os.path.join(MBIAS_DIR, "{sample}.options.txt")
     params:
         extra=METHYLDACKEL_MBIAS_EXTRA_ARGS,
@@ -31,7 +29,10 @@ rule methyldackel_mbias:
         os.path.join("logs", "methyldackel_mbias", "{sample}.log")
     shell:
         """
-        options=$(pixi run MethylDackel mbias -@ {threads} {params.extra} {input.ref} {input.bam} {params.prefix} 2>&1 | grep "Suggested inclusion options:" | sed 's/Suggested inclusion options: //')
+        pixi run MethylDackel mbias -@ {threads} {params.extra} {input.ref} {input.bam} {params.prefix} 2> {log}
+        # The options are needed for the next step, so we extract them from the log.
+        # If grep fails, it will have a non-zero exit code, so we add `|| true` to prevent the script from failing
+        options=$(grep "Suggested inclusion options:" {log} | sed 's/Suggested inclusion options: //') || true
         echo -n "${{options}}" > {output.options}
         """
 

@@ -30,7 +30,7 @@ rule bowtie2_build:
     log:
         os.path.join("logs", "chipseq_cutrun", "bowtie2_build.log")
     shell:
-        "touch {output.sentinel}; pixi run bowtie2-build {input.ref} {params.prefix} > {log}.out 2> {log}.err"
+        "pixi run bowtie2-build {input.ref} {params.prefix} > {log}.out 2> {log}.err && touch {output.sentinel}"
 
 rule bowtie2_align_pe:
     """

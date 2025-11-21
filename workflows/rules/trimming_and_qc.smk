@@ -32,7 +32,7 @@ rule fastp_trim:
         -o {output.trimmed_r1} -O {output.trimmed_r2} \
         -h {output.html} -j {output.json} \
         {params.extra} \
-        -t {threads} > {log}.out 2> {log}.err
+        -w {threads} > {log}.out 2> {log}.err
         """
 
 rule fastp_trim_se:
@@ -58,7 +58,7 @@ rule fastp_trim_se:
         -o {output.trimmed_r1} \
         -h {output.html} -j {output.json} \
         {params.extra} \
-        -t {threads} > {log}.out 2> {log}.err
+        -w {threads} > {log}.out 2> {log}.err
         """
 
 # --- QC on Trimmed ---

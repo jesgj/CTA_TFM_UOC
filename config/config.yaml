@@ -51,7 +51,7 @@ wgbs:
   methyldackel_dir: "results/wgbs/methyldackel"
   methyldackel_mergecontext_dir: "results/wgbs/methyldackel_mergecontext"
   fastp:
-    extra_args: "-q 20 -l 50 --trim_front1 5"
+    extra_args: "-q 20 --trim_front1 10 --detect_adapter_for_pe --dont_eval_duplication --trim_poly_g --trim_poly_x --cut_tail"
   bismark:
     extra_args: "--non_directional" # Example parameter
   sambamba:

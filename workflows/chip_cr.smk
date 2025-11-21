@@ -98,7 +98,7 @@ config['subtraction_pairs'] = SUBTRACTION_PAIRS
 
 
 # --- MultiQC Configuration ---
-config["pipeline_name"] = "chip_cr"
+config["pipeline_name"] = "chipseq_cutrun"
 config["multiqc_results_dir"] = "results/chipseq_cutrun"
 
 pe_samples = [s for s, i in SAMPLES_INFO.items() if i['type'] == 'PE']

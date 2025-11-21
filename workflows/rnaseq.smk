@@ -40,12 +40,12 @@ os.makedirs(TRIMMED_DIR, exist_ok=True)
 os.makedirs(QC_TRIMMED_DIR, exist_ok=True)
 os.makedirs(KALLISTO_OUTPUT_DIR, exist_ok=True)
 os.makedirs(ALIGNMENT_DIR, exist_ok=True)
-os.makedirs(os.path.join("logs", "fastqc_raw"), exist_ok=True)
-os.makedirs(os.path.join("logs", "fastp"), exist_ok=True)
-os.makedirs(os.path.join("logs", "fastqc_trimmed"), exist_ok=True)
-os.makedirs(os.path.join("logs", "kallisto_quant"), exist_ok=True)
-os.makedirs(os.path.join("logs", "hisat2_align"), exist_ok=True)
-os.makedirs(os.path.join("logs", "hisat2_build"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "fastqc_raw"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "fastp"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "fastqc_trimmed"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "kallisto_quant"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "hisat2_align"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "hisat2_build"), exist_ok=True)
 
 
 # --- SAMPLE DISCOVERY ---
