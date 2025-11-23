@@ -56,6 +56,9 @@ rule bismark_alignment:
         --genome {params.ref_dir} \
         -1 {input.r1} -2 {input.r2} \
         -o {params.align_dir} --basename {wildcards.sample} > {log}.out 2> {log}.err
+        # Bismark creates a report file with `_PE_` instead of `_pe_`.
+        # We rename it to have a consistent naming convention.
+        mv {params.align_dir}/{wildcards.sample}_PE_report.txt {output.report}
         """
 
 rule deduplicate_bismark:
