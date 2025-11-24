@@ -21,7 +21,7 @@ rule sambamba_filter:
         extra=SAMBAMBA_EXTRA_ARGS
     threads: 8
     log:
-        os.path.join("logs", "sambamba_filter", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "sambamba_filter", "{sample}.log")
     shell:
         """
         pixi run sambamba view -t {threads} -f bam -h -F \"{params.extra}\" {input.bam} -o {output.filtered_bam} 2> {log}
@@ -37,7 +37,7 @@ rule sambamba_sort:
         sorted_bam=os.path.join(SORTED_FILTERED_BAM_DIR, "{sample}_pe.filtered.sorted.bam")
     threads: 8
     log:
-        os.path.join("logs", "sambamba_sort", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "sambamba_sort", "{sample}.log")
     shell:
         """
         pixi run sambamba sort -t {threads} -o {output.sorted_bam} {input.bam} 2> {log}

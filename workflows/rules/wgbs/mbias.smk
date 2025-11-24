@@ -26,7 +26,7 @@ rule methyldackel_mbias:
         prefix=os.path.join(MBIAS_DIR, "{sample}")
     threads: 16
     log:
-        os.path.join("logs", "methyldackel_mbias", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "methyldackel_mbias", "{sample}.log")
     shell:
         """
         pixi run MethylDackel mbias -@ {threads} {params.extra} {input.ref} {input.bam} {params.prefix} 2> {log}

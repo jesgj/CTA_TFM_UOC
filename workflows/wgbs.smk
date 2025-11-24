@@ -53,6 +53,23 @@ os.makedirs(MBIAS_DIR, exist_ok=True)
 os.makedirs(METHYLDACKEL_DIR, exist_ok=True)
 os.makedirs(METHYLDACKEL_MERGECONTEXT_DIR, exist_ok=True)
 
+# Ensure log directories exist
+os.makedirs(os.path.join("logs", config["pipeline"], "bismark_genome_preparation"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "bismark"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "deduplicate_bismark"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "sambamba_filter"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "sambamba_sort"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "methyldackel_mbias"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "methyldackel_extract_methylkit"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "methyldackel_extract_mergecontext"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "samtools_stats_dedup"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "samtools_flagstat_dedup"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "picard_collect_alignment_metrics_dedup"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "samtools_stats_filtered"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "samtools_flagstat_filtered"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "picard_collect_alignment_metrics_filtered"), exist_ok=True)
+
+
 # --- SAMPLE DISCOVERY ---
 SAMPLES_INFO, SAMPLES = prepare_sample_data(config)
 
@@ -117,7 +134,7 @@ use rule samtools_stats_generic as samtools_stats_dedup with:
     output:
         stats = os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.stats.txt")
     log:
-        os.path.join("logs", "samtools_stats_dedup", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "samtools_stats_dedup", "{sample}.log")
 
 use rule samtools_flagstat_generic as samtools_flagstat_dedup with:
     input:
@@ -125,7 +142,7 @@ use rule samtools_flagstat_generic as samtools_flagstat_dedup with:
     output:
         flagstat = os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.flagstat.txt")
     log:
-        os.path.join("logs", "samtools_flagstat_dedup", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "samtools_flagstat_dedup", "{sample}.log")
 
 use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_dedup with:
     input:
@@ -134,7 +151,7 @@ use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_me
     output:
         metrics = os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.alignment_summary_metrics.txt")
     log:
-        os.path.join("logs", "picard_collect_alignment_metrics_dedup", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "picard_collect_alignment_metrics_dedup", "{sample}.log")
 
 # Filtered BAMs
 use rule samtools_stats_generic as samtools_stats_filtered with:
@@ -143,7 +160,7 @@ use rule samtools_stats_generic as samtools_stats_filtered with:
     output:
         stats = os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.stats.txt")
     log:
-        os.path.join("logs", "samtools_stats_filtered", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "samtools_stats_filtered", "{sample}.log")
 
 use rule samtools_flagstat_generic as samtools_flagstat_filtered with:
     input:
@@ -151,7 +168,7 @@ use rule samtools_flagstat_generic as samtools_flagstat_filtered with:
     output:
         flagstat = os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.flagstat.txt")
     log:
-        os.path.join("logs", "samtools_flagstat_filtered", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "samtools_flagstat_filtered", "{sample}.log")
 
 use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_filtered with:
     input:
@@ -160,7 +177,7 @@ use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_me
     output:
         metrics = os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.alignment_summary_metrics.txt")
     log:
-        os.path.join("logs", "picard_collect_alignment_metrics_filtered", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "picard_collect_alignment_metrics_filtered", "{sample}.log")
 
 
 # --- FINAL TARGETS ---

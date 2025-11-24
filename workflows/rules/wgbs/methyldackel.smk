@@ -28,7 +28,7 @@ rule methyldackel_extract_methylkit:
         extra=METHYLDACKEL_EXTRACT_EXTRA_ARGS
     threads: 1
     log:
-        os.path.join("logs", "methyldackel_extract_methylkit", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "methyldackel_extract_methylkit", "{sample}.log")
     shell:
         """
         options=$(cat {input.options})
@@ -51,7 +51,7 @@ rule methyldackel_extract_mergecontext:
         extra=METHYLDACKEL_EXTRACT_EXTRA_ARGS
     threads: 1
     log:
-        os.path.join("logs", "methyldackel_extract_mergecontext", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "methyldackel_extract_mergecontext", "{sample}.log")
     shell:
         """
         options=$(cat {input.options})

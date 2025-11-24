@@ -25,7 +25,7 @@ rule bismark_genome_preparation:
         ref_dir = REF_DIR
     threads: 1
     log:
-        "logs/bismark_genome_preparation.log"
+        os.path.join("logs", config["pipeline"], "bismark_genome_preparation", "bismark_genome_preparation.log")
     shell:
         """
         pixi run bismark_genome_preparation --bowtie2 --verbose {params.ref_dir} > {log}.out 2> {log}.err
@@ -49,7 +49,7 @@ rule bismark_alignment:
         extra = BISMARK_EXTRA_ARGS
     threads: 64
     log:
-        os.path.join("logs", "bismark", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "bismark", "{sample}.log")
     shell:
         """
         pixi run bismark --bowtie2 -p {params.parallel} {params.extra} \
@@ -75,10 +75,10 @@ rule deduplicate_bismark:
         auto_output_bam = lambda wildcards: os.path.join(ALIGN_DIR, f"{wildcards.sample}_pe.deduplicated.bam"),
         auto_output_report = lambda wildcards: os.path.join(ALIGN_DIR, f"{wildcards.sample}_pe.deduplication_report.txt")
     log:
-        os.path.join("logs", "deduplicate_bismark", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "deduplicate_bismark", "{sample}.log")
     shell:
         """
-        pixi run deduplicate_bismark -p --bam {input.bam} 2> {params.auto_output_report} 1> {log}
+        pixi run deduplicate_bismark -p --bam {input.bam} &> {log}
         mv {params.auto_output_bam} {output.dedup_bam}
         mv {params.auto_output_report} {output.report}
         """
