@@ -28,7 +28,7 @@ rule bowtie2_build:
         prefix = BOWTIE2_INDEX_PREFIX
     threads: 1
     log:
-        os.path.join("logs", "chipseq_cutrun", "bowtie2_build.log")
+        os.path.join("logs", config["pipeline"], "bowtie2_build.log")
     shell:
         "pixi run bowtie2-build {input.ref} {params.prefix} > {log}.out 2> {log}.err && touch {output.sentinel}"
 
@@ -48,7 +48,7 @@ rule bowtie2_align_pe:
         index_prefix = BOWTIE2_INDEX_PREFIX
     threads: 8
     log:
-        os.path.join("logs", "chipseq_cutrun", "bowtie2_align", "{sample}_pe.log")
+        os.path.join("logs", config["pipeline"], "bowtie2_align", "{sample}_pe.log")
     shell:
         """
         (pixi run bowtie2 -p {threads} {params.extra} -x {params.index_prefix} -1 {input.r1} -2 {input.r2} | \
@@ -71,7 +71,7 @@ rule bowtie2_align_se:
         index_prefix = BOWTIE2_INDEX_PREFIX
     threads: 8
     log:
-        os.path.join("logs", "chipseq_cutrun", "bowtie2_align", "{sample}_se.log")
+        os.path.join("logs", config["pipeline"], "bowtie2_align", "{sample}_se.log")
     shell:
         """
         (pixi run bowtie2 -p {threads} {params.extra} -x {params.index_prefix} -U {input.r1} | \

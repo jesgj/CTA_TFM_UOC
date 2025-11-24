@@ -8,9 +8,12 @@ import os
 
 _MULTIQC_RESULTS_DIR = config["multiqc_results_dir"]
 _PIPELINE_NAME = config["pipeline_name"]
+_LOG_PIPELINE = config.get("pipeline", _PIPELINE_NAME)
 
 # Construct the paths to scan. MultiQC is efficient at finding relevant files.
-_ANALYSIS_DIRS = f"results/{_PIPELINE_NAME} logs/{_PIPELINE_NAME}"
+_ANALYSIS_DIRS = [f"results/{_PIPELINE_NAME}", f"logs/{_PIPELINE_NAME}"]
+if _LOG_PIPELINE != _PIPELINE_NAME:
+    _ANALYSIS_DIRS.append(f"logs/{_LOG_PIPELINE}")
 
 
 rule multiqc:
@@ -19,9 +22,10 @@ rule multiqc:
     output:
         report = os.path.join(_MULTIQC_RESULTS_DIR, "multiqc_report.html")
     params:
-        analysis_dirs = _ANALYSIS_DIRS,
-        output_dir = _MULTIQC_RESULTS_DIR # Pass it to params
+        analysis_dirs = " ".join(_ANALYSIS_DIRS),
+        output_dir = _MULTIQC_RESULTS_DIR,
+        filename = "multiqc_report.html"
     log:
         os.path.join("logs", _PIPELINE_NAME, "multiqc.log")
     shell:
-        "pixi run multiqc {params.analysis_dirs} -o {params.output_dir} --filename multiqc_report.html > {log}.out 2> {log}.err"
+        "pixi run multiqc {params.analysis_dirs} -o {params.output_dir} --filename {params.filename} --force > {log}.out 2> {log}.err"

@@ -39,21 +39,26 @@ config["methyldackel_dir"] = METHYLDACKEL_DIR
 config["methyldackel_mergecontext_dir"] = METHYLDACKEL_MERGECONTEXT_DIR
 config["ref_genome"] = REF_GENOME
 
+
 # Ensure output directories exist
-os.makedirs(QC_DIR, exist_ok=True)
-os.makedirs(TRIMMED_DIR, exist_ok=True)
-os.makedirs(QC_TRIMMED_DIR, exist_ok=True)
-os.makedirs(ALIGN_DIR, exist_ok=True)
-os.makedirs(DEDUP_DIR, exist_ok=True)
-os.makedirs(DEDUP_BAM_QC_DIR, exist_ok=True)
-os.makedirs(FILTERED_BAM_DIR, exist_ok=True)
-os.makedirs(SORTED_FILTERED_BAM_DIR, exist_ok=True)
-os.makedirs(FILTERED_BAM_QC_DIR, exist_ok=True)
-os.makedirs(MBIAS_DIR, exist_ok=True)
-os.makedirs(METHYLDACKEL_DIR, exist_ok=True)
-os.makedirs(METHYLDACKEL_MERGECONTEXT_DIR, exist_ok=True)
+os.makedirs(config["qc_dir"], exist_ok=True)
+os.makedirs(config["trimmed_dir"], exist_ok=True)
+os.makedirs(config["qc_trimmed_dir"], exist_ok=True)
+os.makedirs(config["alignment_dir"], exist_ok=True)
+os.makedirs(config["dedup_dir"], exist_ok=True)
+os.makedirs(config["dedup_bam_qc_dir"], exist_ok=True)
+os.makedirs(config["filtered_bam_dir"], exist_ok=True)
+os.makedirs(config["sorted_filtered_bam_dir"], exist_ok=True)
+os.makedirs(config["filtered_bam_qc_dir"], exist_ok=True)
+os.makedirs(config["mbias_dir"], exist_ok=True)
+os.makedirs(config["methyldackel_dir"], exist_ok=True)
+os.makedirs(config["methyldackel_mergecontext_dir"], exist_ok=True)
 
 # Ensure log directories exist
+os.makedirs(os.path.join("logs", config["pipeline"], "fastqc_raw"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "fastp"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "fastqc_trimmed"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "multiqc"), exist_ok=True)
 os.makedirs(os.path.join("logs", config["pipeline"], "bismark_genome_preparation"), exist_ok=True)
 os.makedirs(os.path.join("logs", config["pipeline"], "bismark"), exist_ok=True)
 os.makedirs(os.path.join("logs", config["pipeline"], "deduplicate_bismark"), exist_ok=True)
@@ -77,19 +82,19 @@ SAMPLES_INFO, SAMPLES = prepare_sample_data(config)
 # --- HELPER FUNCTION FOR OUTPUTS ---
 def get_wgbs_outputs(samples):
     outputs = []
-    outputs.extend([os.path.join(QC_DIR, f"{sample}_{read}_raw_fastqc.html") for sample in samples for read in ["R1", "R2"]])
-    outputs.extend([os.path.join(QC_TRIMMED_DIR, f"{sample}_{read}_trimmed_fastqc.html") for sample in samples for read in ["R1", "R2"]])
-    outputs.extend(expand(os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"), sample=samples))
-    outputs.extend(expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.stats.txt"), sample=samples))
-    outputs.extend(expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.flagstat.txt"), sample=samples))
-    outputs.extend(expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.alignment_summary_metrics.txt"), sample=samples))
-    outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.stats.txt"), sample=samples))
-    outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.flagstat.txt"), sample=samples))
-    outputs.extend(expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.alignment_summary_metrics.txt"), sample=samples))
-    outputs.extend(expand(os.path.join(MBIAS_DIR, "{sample}.options.txt"), sample=samples))
-    outputs.append(os.path.join(MBIAS_DIR, "all_samples_mbias_options.tsv"))
-    outputs.extend(expand(os.path.join(METHYLDACKEL_DIR, "{sample}_methylKit.txt"), sample=samples))
-    outputs.extend(expand(os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}.bedGraph"), sample=samples))
+    outputs.extend([os.path.join(config["qc_dir"], f"{sample}_{read}_raw_fastqc.html") for sample in samples for read in ["R1", "R2"]])
+    outputs.extend([os.path.join(config["qc_trimmed_dir"], f"{sample}_{read}_trimmed_fastqc.html") for sample in samples for read in ["R1", "R2"]])
+    outputs.extend(expand(os.path.join(config["dedup_dir"], "{sample}_pe.deduplicated.bam"), sample=samples))
+    outputs.extend(expand(os.path.join(config["dedup_bam_qc_dir"], "{sample}.dedup.stats.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(config["dedup_bam_qc_dir"], "{sample}.dedup.flagstat.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(config["dedup_bam_qc_dir"], "{sample}.dedup.alignment_summary_metrics.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(config["filtered_bam_qc_dir"], "{sample}.filtered.stats.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(config["filtered_bam_qc_dir"], "{sample}.filtered.flagstat.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(config["filtered_bam_qc_dir"], "{sample}.filtered.alignment_summary_metrics.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(config["mbias_dir"], "{sample}.options.txt"), sample=samples))
+    outputs.append(os.path.join(config["mbias_dir"], "all_samples_mbias_options.tsv"))
+    outputs.extend(expand(os.path.join(config["methyldackel_dir"], "{sample}_methylKit.txt"), sample=samples))
+    outputs.extend(expand(os.path.join(config["methyldackel_mergecontext_dir"], "{sample}.bedGraph"), sample=samples))
     return outputs
 
 # --- MultiQC Configuration ---

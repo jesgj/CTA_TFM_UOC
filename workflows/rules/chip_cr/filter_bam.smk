@@ -30,7 +30,7 @@ rule sambamba_filter_dedup_sort:
         view_extra = SAMBAMBA_VIEW_EXTRA_ARGS
     threads: 8
     log:
-        os.path.join("logs", "chipseq_cutrun", "sambamba_filter", "{sample}_{read_type}.log")
+        os.path.join("logs", config["pipeline"], "sambamba_filter", "{sample}_{read_type}.log")
     shell:
         """
         pixi run bash -c "

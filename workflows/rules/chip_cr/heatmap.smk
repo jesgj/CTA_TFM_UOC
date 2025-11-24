@@ -37,7 +37,7 @@ rule computeMatrix:
     """
     input:
         bws = get_heatmap_input_bigwigs,
-        bed = "ref/genes.bed"
+        bed = config["gene_bed"]
     output:
         matrix = os.path.join(DEEPTOOLS_DIR, "matrix.gz")
     params:
@@ -48,7 +48,7 @@ rule computeMatrix:
         skip_zeros="--skipZeros" if config.get("deeptools", {}).get("computeMatrix", {}).get("skipZeros", True) else ""
     threads: 8
     log:
-        os.path.join("logs", "chipseq_cutrun", "deeptools", "computeMatrix.log")
+        os.path.join("logs", config["pipeline"], "deeptools", "computeMatrix.log")
     shell:
         """
         pixi run computeMatrix scale-regions \\
@@ -75,7 +75,7 @@ rule plotHeatmap:
         extra = config.get("deeptools", {}).get("plotHeatmap", {}).get("extra_args", "")
     threads: 1
     log:
-        os.path.join("logs", "chipseq_cutrun", "deeptools", "plotHeatmap.log")
+        os.path.join("logs", config["pipeline"], "deeptools", "plotHeatmap.log")
     shell:
         """
         pixi run plotHeatmap \\

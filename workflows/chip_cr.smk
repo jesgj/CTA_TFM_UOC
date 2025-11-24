@@ -35,6 +35,7 @@ config["deeptools_dir"] = DEEPTOOLS_DIR
 config["bigwig_dir"] = BIGWIG_DIR
 config["subtracted_bigwig_dir"] = SUBTRACTED_BIGWIG_DIR
 
+
 # Ensure output directories exist
 os.makedirs(QC_DIR, exist_ok=True)
 os.makedirs(TRIMMED_DIR, exist_ok=True)
@@ -47,11 +48,14 @@ os.makedirs(FILTERED_BAM_QC_DIR, exist_ok=True)
 os.makedirs(DEEPTOOLS_DIR, exist_ok=True)
 os.makedirs(BIGWIG_DIR, exist_ok=True)
 os.makedirs(SUBTRACTED_BIGWIG_DIR, exist_ok=True)
-os.makedirs(os.path.join("logs", "chipseq_cutrun", "bowtie2_align"), exist_ok=True)
-os.makedirs(os.path.join("logs", "chipseq_cutrun", "bam_qc"), exist_ok=True)
-os.makedirs(os.path.join("logs", "chipseq_cutrun", "sambamba_filter"), exist_ok=True)
-os.makedirs(os.path.join("logs", "chipseq_cutrun", "deeptools"), exist_ok=True)
-os.makedirs(os.path.join("logs", "chipseq_cutrun", "bamCoverage"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "fastqc_raw"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "fastp"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "fastqc_trimmed"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "bowtie2_align"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "bam_qc"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "sambamba_filter"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "deeptools"), exist_ok=True)
+os.makedirs(os.path.join("logs", config["pipeline"], "bamCoverage"), exist_ok=True)
 
 
 # --- SAMPLE DISCOVERY ---
@@ -181,7 +185,7 @@ use rule samtools_stats_generic as samtools_stats_aligned with:
     output:
         stats = os.path.join(BAM_QC_DIR, "{sample}_{read_type}.stats.txt")
     log:
-        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_stats.log")
+        os.path.join("logs", config["pipeline"], "bam_qc", "{sample}_{read_type}_stats.log")
 
 use rule samtools_flagstat_generic as samtools_flagstat_aligned with:
     input:
@@ -189,7 +193,7 @@ use rule samtools_flagstat_generic as samtools_flagstat_aligned with:
     output:
         flagstat = os.path.join(BAM_QC_DIR, "{sample}_{read_type}.flagstat.txt")
     log:
-        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_flagstat.log")
+        os.path.join("logs", config["pipeline"], "bam_qc", "{sample}_{read_type}_flagstat.log")
 
 use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_aligned with:
     input:
@@ -198,7 +202,7 @@ use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_me
     output:
         metrics = os.path.join(BAM_QC_DIR, "{sample}_{read_type}.alignment_summary_metrics.txt")
     log:
-        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_picard_metrics.log")
+        os.path.join("logs", config["pipeline"], "bam_qc", "{sample}_{read_type}_picard_metrics.log")
 
 # Filtered BAMs
 use rule samtools_stats_generic as samtools_stats_filtered with:
@@ -207,7 +211,7 @@ use rule samtools_stats_generic as samtools_stats_filtered with:
     output:
         stats = os.path.join(FILTERED_BAM_QC_DIR, "{sample}_{read_type}.stats.txt")
     log:
-        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_filtered_stats.log")
+        os.path.join("logs", config["pipeline"], "bam_qc", "{sample}_{read_type}_filtered_stats.log")
 
 use rule samtools_flagstat_generic as samtools_flagstat_filtered with:
     input:
@@ -215,7 +219,7 @@ use rule samtools_flagstat_generic as samtools_flagstat_filtered with:
     output:
         flagstat = os.path.join(FILTERED_BAM_QC_DIR, "{sample}_{read_type}.flagstat.txt")
     log:
-        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_filtered_flagstat.log")
+        os.path.join("logs", config["pipeline"], "bam_qc", "{sample}_{read_type}_filtered_flagstat.log")
 
 use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_filtered with:
     input:
@@ -224,7 +228,7 @@ use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_me
     output:
         metrics = os.path.join(FILTERED_BAM_QC_DIR, "{sample}_{read_type}.alignment_summary_metrics.txt")
     log:
-        os.path.join("logs", "chipseq_cutrun", "bam_qc", "{sample}_{read_type}_filtered_picard_metrics.log")
+        os.path.join("logs", config["pipeline"], "bam_qc", "{sample}_{read_type}_filtered_picard_metrics.log")
 
 
 # --- DEEPTOOLS RULES (from former filtered_bam_qc.smk) ---
@@ -254,7 +258,7 @@ rule multiBamSummary:
         extra = MBS_ARGS
     threads: 8
     log:
-        os.path.join("logs", "chipseq_cutrun", "deeptools", "multiBamSummary.log")
+        os.path.join("logs", config["pipeline"], "deeptools", "multiBamSummary.log")
     shell:
         "pixi run multiBamSummary bins -b {input.bams} -o {output.npz} -p {threads} {params.extra} > {log}.out 2> {log}.err"
 
@@ -271,7 +275,7 @@ rule plotCorrelation:
         extra = PC_ARGS
     threads: 1
     log:
-        os.path.join("logs", "chipseq_cutrun", "deeptools", "plotCorrelation.log")
+        os.path.join("logs", config["pipeline"], "deeptools", "plotCorrelation.log")
     shell:
         "pixi run plotCorrelation -in {input.npz} -o {output.heatmap} --outFileCorMatrix {output.matrix} {params.extra} > {log}.out 2> {log}.err"
 
@@ -288,7 +292,7 @@ rule plotFingerprint:
         extra = PF_ARGS
     threads: 8
     log:
-        os.path.join("logs", "chipseq_cutrun", "deeptools", "plotFingerprint.log")
+        os.path.join("logs", config["pipeline"], "deeptools", "plotFingerprint.log")
     shell:
         "pixi run plotFingerprint -b {input.bams} -o {output.plot} --outRawCounts {output.metrics} -p {threads} {params.extra} > {log}.out 2> {log}.err"
 

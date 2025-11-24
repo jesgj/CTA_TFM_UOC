@@ -27,7 +27,7 @@ rule bamCoverage:
         extra = BC_ARGS
     threads: 8
     log:
-        os.path.join("logs", "chipseq_cutrun", "bamCoverage", "{sample}_{read_type}.log")
+        os.path.join("logs", config["pipeline"], "bamCoverage", "{sample}_{read_type}.log")
     shell:
         """
 pixi run bamCoverage -b {input.bam} -o {output.bigwig} \
@@ -66,7 +66,7 @@ rule bigwigCompare:
         extra = BWC_ARGS
     threads: 1
     log:
-        os.path.join("logs", "chipseq_cutrun", "deeptools", "{sample}_{read_type}_bigwigCompare.log")
+        os.path.join("logs", config["pipeline"], "deeptools", "{sample}_{read_type}_bigwigCompare.log")
     shell:
         """
 pixi run bigwigCompare \

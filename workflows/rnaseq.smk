@@ -34,11 +34,13 @@ config["ref_genome"] = REF_GENOME
 config["hisat2_index_dir"] = HISAT2_INDEX_DIR
 config["alignment_dir"] = ALIGNMENT_DIR
 
+
 # Ensure output directories exist
 os.makedirs(QC_DIR, exist_ok=True)
 os.makedirs(TRIMMED_DIR, exist_ok=True)
 os.makedirs(QC_TRIMMED_DIR, exist_ok=True)
 os.makedirs(KALLISTO_OUTPUT_DIR, exist_ok=True)
+os.makedirs(HISAT2_INDEX_DIR, exist_ok=True)
 os.makedirs(ALIGNMENT_DIR, exist_ok=True)
 os.makedirs(os.path.join("logs", config["pipeline"], "fastqc_raw"), exist_ok=True)
 os.makedirs(os.path.join("logs", config["pipeline"], "fastp"), exist_ok=True)
