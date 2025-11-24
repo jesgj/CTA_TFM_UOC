@@ -20,7 +20,7 @@ rule kallisto_index:
         index=KALLISTO_INDEX
     threads: 8
     log:
-        os.path.join("logs", "kallisto_index.log")
+        os.path.join("logs", config["pipeline"], "kallisto_index", "kallisto_index.log")
     shell:
         "pixi run kallisto index -i {output.index} {input.fasta} > {log}.out 2> {log}.err"
 
@@ -40,7 +40,7 @@ rule kallisto_quant:
         output_dir=os.path.join(KALLISTO_OUTPUT_DIR, "{sample}")
     threads: 8
     log:
-        os.path.join("logs", "kallisto_quant", "{sample}.log")
+        os.path.join("logs", config["pipeline"], "kallisto_quant", "{sample}.log")
     shell:
         """
         pixi run kallisto quant -i {input.index} -o {params.output_dir} \

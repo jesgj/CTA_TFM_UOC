@@ -27,7 +27,7 @@ rule hisat2_build:
         prefix=HISAT2_INDEX_PREFIX
     threads: 1
     log:
-        os.path.join("logs", "hisat2_build.log")
+        os.path.join("logs", config["pipeline"], "hisat2_build", "hisat2_build.log")
     shell:
         "pixi run hisat2-build {input.ref} {params.prefix} > {log}.out 2> {log}.err"
 
@@ -47,7 +47,7 @@ rule hisat2_align_pe:
         index_prefix=HISAT2_INDEX_PREFIX
     threads: 8
     log:
-        os.path.join("logs", "hisat2_align", "{sample}_pe.log")
+        os.path.join("logs", config["pipeline"], "hisat2_align", "{sample}_pe.log")
     shell:
         """
         (pixi run hisat2 -p {threads} {params.extra} -x {params.index_prefix} -1 {input.r1} -2 {input.r2} | \
