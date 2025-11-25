@@ -47,7 +47,7 @@ rule bismark_alignment:
         parallel = 8,
         align_dir = ALIGN_DIR,
         extra = BISMARK_EXTRA_ARGS
-    threads: 64
+    threads: 66
     log:
         os.path.join("logs", config["pipeline"], "bismark", "{sample}.log")
     shell:
@@ -71,14 +71,10 @@ rule deduplicate_bismark:
         dedup_bam = os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"),
         report = os.path.join(DEDUP_DIR, "{sample}_pe.deduplication_report.txt")
     params:
-        # The tool automatically creates this output file in the input directory
-        auto_output_bam = lambda wildcards: os.path.join(ALIGN_DIR, f"{wildcards.sample}_pe.deduplicated.bam"),
-        auto_output_report = lambda wildcards: os.path.join(ALIGN_DIR, f"{wildcards.sample}_pe.deduplication_report.txt")
+        outdir = DEDUP_DIR
     log:
         os.path.join("logs", config["pipeline"], "deduplicate_bismark", "{sample}.log")
     shell:
         """
-        pixi run deduplicate_bismark -p --bam {input.bam} &> {log}
-        mv {params.auto_output_bam} {output.dedup_bam}
-        mv {params.auto_output_report} {output.report}
+        pixi run deduplicate_bismark -p --bam {input.bam} --output_dir {params.outdir} > {log}.out 2> {log}.err
         """
