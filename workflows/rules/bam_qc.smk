@@ -42,15 +42,16 @@ rule picard_collect_alignment_metrics_generic:
         ref = config["ref_genome"]
     output:
         metrics = "path/to/output.metrics.txt"
+    threads: 4
     params:
         java_opts=config.get("picard", {}).get("java_opts", "-Xmx4g")
     log:
         "logs/picard_metrics.log"
     shell:
         """
+        mkdir -p "$(dirname "{output.metrics}")"
         pixi run picard {params.java_opts} CollectAlignmentSummaryMetrics \
-            R={input.ref} \
-            I={input.bam} \
-            O={output.metrics} > {log}.out 2> {log}.err
+            -I {input.bam} \
+            -O {output.metrics} --IS_BISULFITE_SEQUENCED true > {log}.out 2> {log}.err
         """
 

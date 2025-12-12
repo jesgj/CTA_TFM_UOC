@@ -21,7 +21,7 @@ rule methyldackel_extract_methylkit:
         ref=REF_GENOME,
         options=os.path.join(MBIAS_DIR, "{sample}.options.txt")
     output:
-        methylkit_file=os.path.join(METHYLDACKEL_DIR, "{sample}_methylKit.txt")
+        methylkit_file=os.path.join(METHYLDACKEL_DIR, "{sample}_CpG.methylKit")
     params:
         output_prefix=os.path.join(METHYLDACKEL_DIR, "{sample}"),
         extra_opts=config.get("methyldackel_extract", {}).get("extra_opts", "--minOppositeDepth 10 --maxVariantFrac 0.5"),
@@ -32,6 +32,7 @@ rule methyldackel_extract_methylkit:
     shell:
         """
         options=$(cat {input.options})
+        echo ${{options}}
         pixi run MethylDackel extract --methylKit ${{options}} {params.extra_opts} {params.extra} -o {params.output_prefix} {input.ref} {input.bam} > {log}.out 2> {log}.err
         """
 
@@ -44,7 +45,7 @@ rule methyldackel_extract_mergecontext:
         ref=REF_GENOME,
         options=os.path.join(MBIAS_DIR, "{sample}.options.txt")
     output:
-        bedgraph=os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}.bedGraph")
+        bedgraph=os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}_CpG.bedGraph")
     params:
         output_prefix=lambda wildcards: os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, wildcards.sample),
         extra_opts=config.get("methyldackel_extract", {}).get("extra_opts", "--minOppositeDepth 10 --maxVariantFrac 0.5"),

@@ -24,7 +24,7 @@ rule sambamba_filter:
         os.path.join("logs", config["pipeline"], "sambamba_filter", "{sample}.log")
     shell:
         """
-        pixi run sambamba view -t {threads} -f bam -h -F '{params.extra}' {input.bam} -o {output.filtered_bam} 2> {log}
+        pixi run sambamba view -t {threads} -f bam -h -F "{params.extra}" {input.bam} -o {output.filtered_bam} 2> {log}
         """
 
 rule sambamba_sort:

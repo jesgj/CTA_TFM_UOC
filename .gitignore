@@ -6,3 +6,6 @@ data/
 ref/
 # results directory
 results/
+# logs
+logs/
+.snakemake

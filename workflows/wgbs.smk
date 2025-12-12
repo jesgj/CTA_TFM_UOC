@@ -87,14 +87,14 @@ def get_wgbs_outputs(samples):
     outputs.extend(expand(os.path.join(config["dedup_dir"], "{sample}_pe.deduplicated.bam"), sample=samples))
     outputs.extend(expand(os.path.join(config["dedup_bam_qc_dir"], "{sample}.dedup.stats.txt"), sample=samples))
     outputs.extend(expand(os.path.join(config["dedup_bam_qc_dir"], "{sample}.dedup.flagstat.txt"), sample=samples))
-    outputs.extend(expand(os.path.join(config["dedup_bam_qc_dir"], "{sample}.dedup.alignment_summary_metrics.txt"), sample=samples))
+    #outputs.extend(expand(os.path.join(config["dedup_bam_qc_dir"], "{sample}.dedup.alignment_summary_metrics.txt"), sample=samples))
     outputs.extend(expand(os.path.join(config["filtered_bam_qc_dir"], "{sample}.filtered.stats.txt"), sample=samples))
     outputs.extend(expand(os.path.join(config["filtered_bam_qc_dir"], "{sample}.filtered.flagstat.txt"), sample=samples))
     outputs.extend(expand(os.path.join(config["filtered_bam_qc_dir"], "{sample}.filtered.alignment_summary_metrics.txt"), sample=samples))
     outputs.extend(expand(os.path.join(config["mbias_dir"], "{sample}.options.txt"), sample=samples))
     outputs.append(os.path.join(config["mbias_dir"], "all_samples_mbias_options.tsv"))
-    outputs.extend(expand(os.path.join(config["methyldackel_dir"], "{sample}_methylKit.txt"), sample=samples))
-    outputs.extend(expand(os.path.join(config["methyldackel_mergecontext_dir"], "{sample}.bedGraph"), sample=samples))
+    outputs.extend(expand(os.path.join(config["methyldackel_dir"], "{sample}_CpG.methylKit"), sample=samples))
+    outputs.extend(expand(os.path.join(config["methyldackel_mergecontext_dir"], "{sample}_CpG.bedGraph"), sample=samples))
     return outputs
 
 # --- MultiQC Configuration ---
@@ -132,7 +132,7 @@ include: "rules/multiqc.smk"
 
 # --- BAM QC INSTANTIATION ---
 
-# Deduplicated BAMs
+# Deduplicated BAM (need to be ordered before add the sort)
 use rule samtools_stats_generic as samtools_stats_dedup with:
     input:
         bam = os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam")
@@ -149,14 +149,14 @@ use rule samtools_flagstat_generic as samtools_flagstat_dedup with:
     log:
         os.path.join("logs", config["pipeline"], "samtools_flagstat_dedup", "{sample}.log")
 
-use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_dedup with:
-    input:
-        bam = os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"),
-        ref = config["ref_genome"]
-    output:
-        metrics = os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.alignment_summary_metrics.txt")
-    log:
-        os.path.join("logs", config["pipeline"], "picard_collect_alignment_metrics_dedup", "{sample}.log")
+#use rule picard_collect_alignment_metrics_generic as picard_collect_alignment_metrics_dedup with:
+#    input:
+#        bam = os.path.join(DEDUP_DIR, "{sample}_pe.deduplicated.bam"),
+#        ref = config["ref_genome"]
+#    output:
+#        metrics = os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.alignment_summary_metrics.txt")
+#    log:
+#        os.path.join("logs", config["pipeline"], "picard_collect_alignment_metrics_dedup", "{sample}.log")
 
 # Filtered BAMs
 use rule samtools_stats_generic as samtools_stats_filtered with:
@@ -202,7 +202,7 @@ rule all:
         # 4. QC reports for deduplicated BAMs
         expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.stats.txt"), sample=SAMPLES),
         expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.flagstat.txt"), sample=SAMPLES),
-        expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.alignment_summary_metrics.txt"), sample=SAMPLES),
+        #expand(os.path.join(DEDUP_BAM_QC_DIR, "{sample}.dedup.alignment_summary_metrics.txt"), sample=SAMPLES),
 
         # 5. QC reports for filtered BAMs
         expand(os.path.join(FILTERED_BAM_QC_DIR, "{sample}.filtered.stats.txt"), sample=SAMPLES),
@@ -214,8 +214,8 @@ rule all:
         os.path.join(MBIAS_DIR, "all_samples_mbias_options.tsv"),
 
         # 7. Methylation extraction reports
-        expand(os.path.join(METHYLDACKEL_DIR, "{sample}_methylKit.txt"), sample=SAMPLES),
-        expand(os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}.bedGraph"), sample=SAMPLES),
+        expand(os.path.join(METHYLDACKEL_DIR, "{sample}_CpG.methylKit"), sample=SAMPLES),
+        expand(os.path.join(METHYLDACKEL_MERGECONTEXT_DIR, "{sample}_CpG.bedGraph"), sample=SAMPLES),
         
         # MultiQC report
         os.path.join(config["multiqc_results_dir"], "multiqc_report.html")
