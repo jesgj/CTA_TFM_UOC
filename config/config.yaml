@@ -1,5 +1,4 @@
-pipeline: "wgbs"  # Change to "rnaseq" to change the pipeline
-
+pipeline: "chip_cr"  # Change to "rnaseq" to change the pipeline
 rnaseq:
   raw_fastqs_dir: "data/rnaseq_raw_fastqs"
   samples_info:
@@ -89,42 +88,19 @@ wgbs:
     java_opts: "-Xmx4g" # AÑADIR --IS_BISULFITE_SEQUENCED
 
 chip_cr:
-  raw_fastqs_dir: "data/chip_seq_raw_fastqs"
+  raw_fastqs_dir: "data/chip_test_pipeline/"
   samples_info:
-    liver_input_rep1:
-      R1: "data/chip_seq_raw_fastqs/liver_input_rep1_1.fastq.gz"
-      R2: "data/chip_seq_raw_fastqs/liver_input_rep1_2.fastq.gz"
+    Dome_ctrl_H3K4me3_rep1:
+      R1: "data/chip_test_pipeline/Dome_ctrl_H3K4me3_rep1_R1.sample.fastq.gz"
+      R2: "data/chip_test_pipeline/Dome_ctrl_H3K4me3_rep1_R2.sample.fastq.gz"
       type: "PE"
-    liver_input_rep2:
-      R1: "data/chip_seq_raw_fastqs/liver_input_rep2_1.fastq.gz"
-      R2: "data/chip_seq_raw_fastqs/liver_input_rep2_2.fastq.gz"
+    Shield_ctrl_H3K27ac_rep1:
+      R1: "data/chip_test_pipeline/Shield_ctrl_H3K27ac_rep1_R1.sample.fastq.gz"
+      R2: "data/chip_test_pipeline/Shield_ctrl_H3K27ac_rep1_R2.sample.fastq.gz"
       type: "PE"
-    liver_rep1:
-      R1: "data/chip_seq_raw_fastqs/liver_rep1_1.fastq.gz"
-      R2: "data/chip_seq_raw_fastqs/liver_rep1_2.fastq.gz"
-      type: "PE"
-    liver_rep2:
-      R1: "data/chip_seq_raw_fastqs/liver_rep2_1.fastq.gz"
-      R2: "data/chip_seq_raw_fastqs/liver_rep2_2.fastq.gz"
-      type: "PE"
-    muscle_input_rep1:
-      R1: "data/chip_seq_raw_fastqs/muscle_input_rep1_1.fastq.gz"
-      R2: "data/chip_seq_raw_fastqs/muscle_input_rep1_2.fastq.gz"
-      type: "PE"
-    muscle_input_rep2:
-      R1: "data/chip_seq_raw_fastqs/muscle_input_rep2_1.fastq.gz"
-      R2: "data/chip_seq_raw_fastqs/muscle_input_rep2_2.fastq.gz"
-      type: "PE"
-    muscle_rep1:
-      R1: "data/chip_seq_raw_fastqs/muscle_rep1_1.fastq.gz"
-      R2: "data/chip_seq_raw_fastqs/muscle_rep1_2.fastq.gz"
-      type: "PE"
-    muscle_rep2:
-      R1: "data/chip_seq_raw_fastqs/muscle_rep2_1.fastq.gz"
-      R2: "data/chip_seq_raw_fastqs/muscle_rep2_2.fastq.gz"
-      type: "PE"
+  gene_bed: "ref/genes.bed"
   qc_dir: "results/chipseq_cutrun/qc_raw"
-  ref_genome: "ref/genome.fa"
+  ref_genome: "ref/Danio_rerio.GRCz11.dna.primary_assembly.fa.gz"
   trimmed_dir: "results/chipseq_cutrun/trimmed_fastqs"
   qc_trimmed_dir: "results/chipseq_cutrun/qc_trimmed"
   alignment_dir: "results/chipseq_cutrun/aligned_bams"
@@ -152,12 +128,12 @@ chip_cr:
       afterRegionStartLength: 3000
       skipZeros: True
     plotCorrelation:
-      extra_args: "--corMethod spearman --skipZeros"
+      extra_args: "-p heatmap --corMethod spearman --skipZeros"
     plotFingerprint:
       extra_args: ""
     bamCoverage:
-      normalize_using: "BPM"
-      extra_args: "--effectiveGenomeSize 2913022398" # Example for hg38, user should change
+      normalize_using: "CPM"
+      extra_args: ""
     bigwigCompare:
       method: "subtract"
       extra_args: ""

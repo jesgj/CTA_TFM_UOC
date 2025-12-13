@@ -8,4 +8,5 @@ ref/
 results/
 # logs
 logs/
-.snakemake
+.snakemake/
+ref
