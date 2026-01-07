@@ -51,7 +51,7 @@ rule bowtie2_align_pe:
         os.path.join("logs", config["pipeline"], "bowtie2_align", "{sample}_pe.log")
     shell:
         """
-        (pixi run bowtie2 -p {threads} {params.extra} -x {params.index_prefix} -1 {input.r1} -2 {input.r2} | \
+        pixi run bowtie2 -p {threads} {params.extra} -x {params.index_prefix} -1 {input.r1} -2 {input.r2} | \
         pixi run samtools view -bS - | \
         pixi run samtools sort -@ {threads} - -o {output.bam}) 2> {log}
         """
@@ -74,7 +74,7 @@ rule bowtie2_align_se:
         os.path.join("logs", config["pipeline"], "bowtie2_align", "{sample}_se.log")
     shell:
         """
-        (pixi run bowtie2 -p {threads} {params.extra} -x {params.index_prefix} -U {input.r1} | \
+        pixi run bowtie2 -p {threads} {params.extra} -x {params.index_prefix} -U {input.r1} | \
         pixi run samtools view -bS - | \
         pixi run samtools sort -@ {threads} - -o {output.bam}) 2> {log}
         """
