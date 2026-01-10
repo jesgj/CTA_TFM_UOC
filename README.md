@@ -226,4 +226,4 @@ Modifica esos campos para ajustar calidad, recorte, filtros, normalización de b
 ## Licencia
 Ver `LICENSE`.
 
-![Pipeline](pipeline.svg)
+![Pipeline](pipeline_wbg.svg)
